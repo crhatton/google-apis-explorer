@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<!--
+     To build, you must locate dependencies. You can do this by either setting
+     an environment variable or by specifying it at build time.
+
+     There should be a directory where the following jars can be found:
+
+     GWT:
+     * Required jars: gwt-user.jar, gwt-dev.jar
+     * Environment variable: GWT_DIR
+     * Ant argument: -Dgwtdir
+
+     GWT client module:
+     * Required jars: google-api-gwt-client.jar
+     * Environment variable: GOOGLEAPI_DIR
+     * Ant argument: -Dgoogleapidir
+
+     JSR 305:
+     * Required jar: jsr305.jar
+     * Environment variable: JSR305_DIR
+     * Ant argument: -Djsr305dir
+
+     JUnit:
+     * Required jar: junit.jar
+     * Environment variable: JUNIT_DIR
+     * Ant argument: -Djunitdir
+-->
+<project basedir="." default="build" name="google-api-explorer">
+  <property environment="env" />
+  <!-- Dependencies -->
+  <property name="gwtdir" value="${env.GWT_DIR}" />
+  <property name="googleapidir" value="${env.GOOGLEAPI_DIR}" />
+  <property name="guavadir" value="lib" />
+  <property name="junitdir" value="${env.JUNIT_DIR}" />
+  <property name="jsr305dir" value="${env.JSR305_DIR}" />
+
+  <property name="src.dir" value="${basedir}/src" />
+  <property name="build.dir" value="${basedir}/build" />
+  <property name="build.classes.dir" value="${basedir}/build/classes" />
+  <property name="gwt-test.dir" value="${basedir}/gwt-test" />
+  <property name="test.dir" value="${basedir}/test" />
+  <property name="build.dist.dir" value="${basedir}/build/dist" />
+  <property name="build.javadoc.dir" value="${basedir}/build/javadoc" />
+  <property name="build.gwt-test.classes.dir" value="${basedir}/build/gwt-test/classes" />
+  <property name="build.test.classes.dir" value="${basedir}/build/test/classes" />
+
+  <property name="debuglevel" value="source,lines,vars" />
+
+  <target name="explorer.verify" description="Check that necessary dependencies are found">
+    <available file="${gwtdir}/gwt-user.jar" property="foundgwtuserjar" />
+    <fail unless="foundgwtuserjar" message="Cannot find gwt-user.jar" />
+
+    <available file="${gwtdir}/gwt-dev.jar" property="foundgwtdevjar" />
+    <fail unless="foundgwtdevjar" message="Cannot find gwt-dev.jar" />
+
+    <available file="${googleapidir}/google-api-gwt-client.jar" property="foundgoogleapijar" />
+    <fail unless="foundgoogleapijar" message="Cannot find google-api-gwt-client.jar" />
+  </target>
+
+  <target name="explorer.build" depends="clean, explorer.verify" description="Compile GWT sources with javac">
+    <mkdir dir="${build.classes.dir}" />
+    <copy includeemptydirs="false" todir="${build.classes.dir}">
+      <fileset dir="${src.dir}" />
+    </copy>
+
+    <echo message="${ant.project.name}: ${ant.file}" />
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.classes.dir}">
+      <src path="${src.dir}" />
+      <classpath>
+        <pathelement location="${build.classes.dir}" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${googleapidir}/google-api-gwt-client.jar" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="explorer.gwtbuild" depends="explorer.build" description="Compile GWT sources with GWT compiler">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+      <classpath>
+        <pathelement location="${build.classes.dir}" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${gwtdir}/gwt-dev.jar" />
+        <pathelement location="${googleapidir}/google-api-gwt-client.jar" />
+      </classpath>
+
+      <jvmarg value="-Xmx256M" />
+      <arg line="-war" />
+      <arg value="war" />
+      <arg value="com.google.api.explorer.Explorer" />
+    </java>
+  </target>
+
+  <target name="client.verify" description="Check that necessary dependencies are found">
+    <available file="${gwtdir}/gwt-user.jar" property="foundgwtuserjar" />
+    <fail unless="foundgwtuserjar" message="Cannot find gwt-user.jar" />
+
+    <available file="${gwtdir}/gwt-dev.jar" property="foundgwtdevjar" />
+    <fail unless="foundgwtdevjar" message="Cannot find gwt-dev.jar" />
+
+    <available file="${guavadir}/guava-r07.jar" property="foundguavajar" />
+    <fail unless="foundguavajar" message="Cannot find guava-r07.jar" />
+
+    <available file="${guavadir}/guava-r07-gwt.jar" property="foundguavagwtjar" />
+    <fail unless="foundguavagwtjar" message="Cannot find guava-r07-gwt.jar" />
+  </target>
+
+  <target name="test.verify" description="Check that necessary dependencies are found">
+    <available file="${junitdir}/junit.jar" property="foundjunitjar" />
+    <fail unless="foundjunitjar" message="Cannot find junit.jar" />
+  </target>
+
+  <target name="client.build" depends="clean, client.verify" description="Compile GWT client GWT sources with javac">
+    <mkdir dir="${build.classes.dir}"/>
+    <copy includeemptydirs="false" todir="${build.classes.dir}">
+      <fileset dir="${src.dir}" />
+    </copy>
+
+    <echo message="${ant.project.name}: ${ant.file}"/>
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.classes.dir}">
+      <src path="${src.dir}"/>
+      <classpath>
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${guavadir}/guava-r07.jar" />
+        <pathelement location="${guavadir}/guava-r07-gwt.jar" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jar" depends="client.build" description="Generate a JAR of the GWT Client library">
+    <mkdir dir="${build.dist.dir}/google-api-gwt-client-${release}" />
+    <jar jarfile="${build.dist.dir}/google-api-gwt-client-${release}/google-api-gwt-client-${release}.jar">
+      <fileset dir="." />
+      <fileset dir="${build.classes.dir}" />
+    </jar>
+  </target>
+
+  <target name="client.gwt-test.build" depends="jar, test.verify" description="Compile GWT Client test sources with javac">
+    <mkdir dir="${build.gwt-test.classes.dir}" />
+    <javac srcdir="${gwt-test.dir}" debug="on" destdir="${build.gwt-test.classes.dir}">
+      <compilerarg value="-Xlint:all" />
+      <classpath>
+        <pathelement location="${build.dist.dir}/google-api-gwt-client-${release}.jar" />
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${guavadir}/guava-r07.jar" />
+        <pathelement location="${guavadir}/guava-r07-gwt.jar" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${jsr305dir}/jsr305.jar" />
+        <pathelement location="${junitdir}/junit.jar" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="client.gwt-test.gwtbuild" depends="client.gwt-test.build"
+      description="Compile the GWT test sources and GWT client module together with GWT compiler">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+      <classpath>
+        <pathelement location="${build.dist.dir}/google-api-gwt-client-${release}.jar" />
+        <pathelement location="${gwt-test.dir}" />
+        <pathelement location="${build.gwt-test.classes.dir}" />
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${guavadir}/guava-r07.jar" />
+        <pathelement location="${guavadir}/guava-r07-gwt.jar" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${gwtdir}/gwt-dev.jar" />
+        <pathelement location="${jsr305dir}/jsr305.jar" />
+        <pathelement location="${junitdir}/junit.jar" />
+      </classpath>
+
+      <!-- Add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+      <jvmarg value="-Xmx256M" />
+      <arg line="-war" />
+      <arg value="war" />
+      <arg value="com.google.api.explorer.client.base.GwtTests" />
+    </java>
+  </target>
+
+  <target name="client.gwt-test.test" depends="client.gwt-test.gwtbuild" description="Run GWT tests for GWT client">
+    <java failonerror="true" fork="true" classname="junit.textui.TestRunner">
+      <classpath>
+        <pathelement location="${build.dist.dir}/google-api-gwt-client-${release}.jar" />
+        <pathelement location="${gwt-test.dir}" />
+        <pathelement location="${build.gwt-test.classes.dir}" />
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${guavadir}/guava-r07.jar" />
+        <pathelement location="${guavadir}/guava-r07-gwt.jar" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${gwtdir}/gwt-dev.jar" />
+        <pathelement location="${jsr305dir}/jsr305.jar" />
+        <pathelement location="${junitdir}/junit.jar" />
+      </classpath>
+
+      <jvmarg value="-Xmx256M" />
+      <arg line="-war" />
+      <arg value="war" />
+      <arg value="com.google.api.explorer.client.base.GwtTests" />
+    </java>
+  </target>
+
+  <target name="client.test.build" depends="jar, test.verify" description="Compile JUnit tests for GWT client">
+    <mkdir dir="${build.test.classes.dir}" />
+    <javac srcdir="${test.dir}" debug="on" destdir="${build.test.classes.dir}">
+      <compilerarg value="-Xlint:all" />
+      <classpath>
+        <pathelement location="${build.dist.dir}/google-api-gwt-client-${release}.jar" />
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${guavadir}/guava-r07.jar" />
+        <pathelement location="${guavadir}/guava-r07-gwt.jar" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${jsr305dir}/jsr305.jar" />
+        <pathelement location="${junitdir}/junit.jar" />
+      </classpath>
+    </javac>
+  </target>
+
+  <!-- TODO(jasonhall): This fails because we don't include a junit.jar with the
+       ant task definition... -->
+  <target name="client.test.test" depends="client.test.build" description="Run JUnit tests for GWT client">
+    <junit showoutput="true">
+      <classpath>
+        <pathelement location="${build.dist.dir}/google-api-gwt-client-${release}.jar" />
+        <pathelement location="${test.dir}" />
+        <pathelement location="${build.test.classes.dir}" />
+        <pathelement location="${build.classes.dir}"/>
+        <pathelement location="${guavadir}/guava-r07.jar" />
+        <pathelement location="${guavadir}/guava-r07-gwt.jar" />
+        <pathelement location="${gwtdir}/gwt-user.jar" />
+        <pathelement location="${gwtdir}/gwt-dev.jar" />
+        <pathelement location="${jsr305dir}/jsr305.jar" />
+        <pathelement location="${junitdir}/junit.jar" />
+      </classpath>
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+        <fileset dir="${test.dir}">
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="clean" description="Remove generated files">
+    <delete dir="${build.dir}" />
+  </target>
+</project>

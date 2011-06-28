@@ -1,0 +1,24 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:auth="urn:import:com.google.api.explorer.client.auth"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:embedded="urn:import:com.google.api.explorer.client.embedded">
+  <ui:style>
+    .auth {
+      text-align: right;
+      width: 100%;
+    }
+
+    .history {
+      width: 100%;
+      overflow-y: auto;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    <div>
+      <auth:AuthView styleName="{style.auth} auth" ui:field="authView" />
+      <embedded:EmbeddedParameterForm ui:field="parameterForm" />
+    </div>
+    <embedded:EmbeddedHistoryPanel styleName="{style.history} history-panel" ui:field="historyPanel" />
+  </g:HTMLPanel>
+</ui:UiBinder>

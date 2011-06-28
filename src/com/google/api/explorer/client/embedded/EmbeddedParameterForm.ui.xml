@@ -1,0 +1,121 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    .section {
+      font-size: 14px;
+      height: 100%;
+      width: 100%;
+    }
+
+    .noParams {
+      text-align: center;
+      width: 100%;
+      padding-top: 10px;
+    }
+
+    .section table {
+      width: 100%;
+      padding: 2px;
+      border-spacing: 0;
+      border-collapse: collapse;
+    }
+
+    .section table td {
+      vertical-align: top;
+    }
+
+    .section table td {
+      padding: 0 4px;
+    }
+
+    .section table input {
+      width: 100%;
+    }
+
+    .section textarea {
+      width: 90%;
+      height: 100px;
+      margin: 5px;
+    }
+
+    .body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      width: 100%;
+      max-height: 300px;
+    }
+
+    .body table,
+    .body td {
+      margin-top: 0;
+      padding-bottom: 0 !important;
+    }
+
+    .showRequestBody {
+      text-align: center;
+      cursor: pointer;
+      padding-top: 3px;
+    }
+
+    .popup {
+    }
+
+    .popupTitle {
+      padding: 5px 0;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .popupBody {
+      padding: 5px;
+      background-color: #FFFFFF;
+    }
+
+    .requestBody {
+      height: 300px;
+      width: 500px;
+    }
+
+    .footer {
+      width: 100%;
+      padding: 4px 0;
+    }
+
+    .executing {
+      vertical-align: middle;
+    }
+  </ui:style>
+  <g:HTMLPanel styleName="{style.section} form">
+    <div class="{style.body}">
+      <g:FlexTable ui:field="table" />
+      <g:Label ui:field="noParams" styleName="{style.noParams}">
+        This method takes no parameters.
+      </g:Label>
+
+      <g:Label ui:field="bodyDisclosure" styleName="{style.showRequestBody}">
+        Show request body
+      </g:Label>
+
+      <g:PopupPanel ui:field="popupPanel" autoHideEnabled="true" modal="true">
+        <g:HTMLPanel styleName="{style.popup} popup">
+          <div class="{style.popupTitle} title">Request body</div>
+          <div class="{style.popupBody} body">
+            <g:TextArea ui:field="requestBody" styleName="{style.requestBody}" />
+            <div>
+              <g:Button ui:field="close">Close</g:Button>
+            </div>
+          </div>
+        </g:HTMLPanel>
+      </g:PopupPanel>
+    </div>
+    <div>
+      <div class="{style.footer} footer">
+        <g:Button ui:field="submit">Execute</g:Button>
+        <img class="{style.executing}" ui:field="executing" />
+        <g:InlineLabel ui:field="requiredDescription">&nbsp;*
+          required field
+        </g:InlineLabel>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

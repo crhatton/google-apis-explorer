@@ -1,0 +1,158 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:auth="urn:import:com.google.api.explorer.client.auth"
+  xmlns:service="urn:import:com.google.api.explorer.client.service"
+  xmlns:version="urn:import:com.google.api.explorer.client.version"
+  xmlns:method="urn:import:com.google.api.explorer.client.method"
+  xmlns:parameter="urn:import:com.google.api.explorer.client.parameter"
+  xmlns:history="urn:import:com.google.api.explorer.client.history">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style>
+    .logo {
+      margin-top: 8px;
+      padding-bottom: 5px;
+      cursor: pointer;
+    }
+
+    .dockLayoutPanel {
+      height: 100%;
+      min-height: 300px;
+      margin: 0 10px;
+    }
+
+    .header {
+      border-width: 1px 1px 0 1px;
+      border-style: solid;
+      border-color: #C9D7F1;
+      background-color: #EBEFF9;
+      padding: 6px;
+      height: 25px;
+    }
+
+    .headerText {
+      padding-left: 3px;
+      font-weight: bold;
+      font-size: 20px;
+      float: left;
+    }
+
+    .auth {
+      float: right;
+    }
+
+    .horizPanel {
+      height: 100%;
+      max-height: 270px;
+      min-height: 270px;
+      width: 100%;
+      border-color: #C9D7F1;
+      border-width: 0 0 0 1px;
+      border-style: solid;
+      border-spacing: 0;
+    }
+
+    .horizPanel>tbody>tr>td {
+      min-width: 200px;
+      border-color: #C9D7F1;
+      border-width: 1px 1px 0 0;
+      border-style: solid;
+      padding: 0;
+      vertical-align: top;
+    }
+
+    .response {
+      border: 2px 0 solid #C9D7F1;
+    }
+
+    .showHide {
+      width: 100%;
+      cursor: pointer;
+      background-color: #C9D7F1;
+      color: white;
+      text-align: center;
+      font-size: 10px;
+      height: 13px;
+    }
+
+    .historyHeader {
+      background-color: #F3F3F3;
+      text-align: center;
+      border-style: solid;
+      border-width: 0 1px;
+      border-color: #C9D7F1;
+      padding: 7px 0;
+      font-size: 14px;
+    }
+
+    .footer {
+      padding-top: 5px;
+      border-style: solid;
+      border-width: 1px 0 0 0;
+      border-color: #C9D7F1;
+      text-align: center;
+    }
+
+    .footer a {
+      color: #4272DB;
+    }
+  </ui:style>
+
+  <g:HTMLPanel>
+    <g:DockLayoutPanel ui:field="dockLayoutPanel" styleName="{style.dockLayoutPanel}">
+      <g:north size="55">
+        <g:Image ui:field="logo" styleName="{style.logo}" resource="{res.logo}" />
+      </g:north>
+      <g:north size="306">
+        <g:HTMLPanel ui:field="selectorPanel">
+          <div class="{style.header}">
+            <span class="{style.headerText}">APIs Explorer</span>
+            <span>
+              <auth:AuthView styleName="{style.auth}" ui:field="authView" />
+            </span>
+          </div>
+          <div>
+            <table class="{style.horizPanel}">
+              <tbody>
+                <tr>
+                  <td width="250" ui:field="serviceColumn">
+                    <service:ServiceSelector visible="false" ui:field="serviceSelector" />
+                  </td>
+                  <td width="200" ui:field="versionColumn">
+                    <version:VersionSelector visible="false" ui:field="versionSelector" />
+                  </td>
+                  <td width="300" ui:field="methodColumn">
+                    <method:MethodSelector visible="false" ui:field="methodSelector" />
+                  </td>
+                  <td width="">
+                    <parameter:ParameterForm visible="false" ui:field="parameterForm" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </g:HTMLPanel>
+      </g:north>
+      <g:north size="13">
+        <g:Label ui:field="showHide" styleName="{style.showHide} {res.style.showHide}"
+          title="Click to expand/collapse selector panel" />
+      </g:north>
+      <g:north size="30">
+        <g:Label styleName="{style.historyHeader}">History</g:Label>
+      </g:north>
+
+      <g:south size="25">
+        <g:HTMLPanel ui:field="footer" styleName="{style.footer}">
+          &copy;
+          2011 Google, Inc. |
+          <a href="http://code.google.com/apis/explorer-help" target="_blank">Help</a>
+          |
+          <a href="http://code.google.com/apis/explorer-help/forum.html" target="_blank">Forum</a>
+          |
+          <a href="http://code.google.com/p/google-apis-explorer/issues/entry?template=Defect%20report%20from%20user"
+            target="_blank">Report a bug</a>
+        </g:HTMLPanel>
+      </g:south>
+    </g:DockLayoutPanel>
+  </g:HTMLPanel>
+</ui:UiBinder>

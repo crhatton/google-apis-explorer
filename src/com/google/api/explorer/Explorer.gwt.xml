@@ -1,0 +1,11 @@
+<module>
+  <inherits name="com.google.gwt.user.User" />
+  <inherits name="com.google.api.gwt.oauth2.OAuth2" />
+  <inherits name="com.google.common.collect.Collect" />
+  <inherits name="com.google.web.bindery.autobean.AutoBean" />
+
+  <entry-point class="com.google.api.explorer.client.ExplorerEntryPoint" />
+
+  <!-- Use Cross-site IFrame linker. -->
+  <add-linker name="xsiframe" />
+</module>

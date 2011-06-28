@@ -1,0 +1,73 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field='res' type='com.google.api.explorer.client.Resources' />
+  <ui:style>
+    .item {
+      border-top: 1px solid #C9D7F1;
+    }
+
+    .item h3 {
+      margin-left: 10px;
+    }
+
+    .titleBar {
+      background-color: #EBEFF9;
+      cursor: pointer;
+      height: 20px;
+      width: auto;
+      padding-top: 2px;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .time {
+      padding: 3px 0 0 6px;
+      font-size: 10px;
+    }
+
+    pre {
+      margin-left: 20px;
+      font-size: 13px;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    .body {
+      width: 100%;
+    }
+
+    .response {
+      white-space: pre-wrap;
+    }
+
+    .showHideHeaders {
+      color: #500050;
+      cursor: pointer;
+      font-size: 9px;
+      padding-left: 20px;
+    }
+  </ui:style>
+  <g:HTMLPanel styleName="{style.item}">
+    <g:FocusPanel ui:field="titleBar" styleName="{style.titleBar} {res.style.expanded} history-header">
+      <g:HTMLPanel>
+        <span ui:field="title" class="{style.title}" />
+        <span ui:field="time" class="{style.time}" />
+      </g:HTMLPanel>
+    </g:FocusPanel>
+    <div ui:field="collapseDiv" class="{style.body}">
+      <g:SimplePanel ui:field="errorPanel" styleName="{res.style.error}" visible="false" />
+      <h3>Request</h3>
+      <pre ui:field="requestDiv" />
+
+      <h3>Response</h3>
+      <pre ui:field="statusDiv" />
+      <g:InlineLabel ui:field="showHideHeaders" styleName="{style.showHideHeaders}">
+        - Show headers -
+      </g:InlineLabel>
+      <pre ui:field="responseHeadersDiv" />
+      <pre ui:field="responseBodyDiv" class="{style.response}" />
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

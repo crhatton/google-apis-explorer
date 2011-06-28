@@ -1,0 +1,8 @@
+<module>
+  <inherits name="com.google.gwt.user.User" />
+  <inherits name="com.google.gwt.json.JSON" />
+  <inherits name="com.google.gwt.junit.JUnit" />
+  <inherits name="com.google.api.explorer.Explorer" />
+
+  <entry-point class="com.google.api.gwt.client.DummyEntryPoint" />
+</module>

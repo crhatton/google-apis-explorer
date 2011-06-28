@@ -1,0 +1,25 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    .clickable {
+      color: #4272DB;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .auth > span {
+      vertical-align: middle;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    <g:InlineLabel ui:field="authState">Using Public Access.</g:InlineLabel>
+    <g:InlineLabel ui:field="authLink" styleName="{style.clickable}">Switch to Private
+      Access</g:InlineLabel>
+    <span ui:field="scopeSelector">
+      with scope:
+      <g:ListBox ui:field="scopeSelectorListBox" />
+    </span>
+    <g:InlineLabel ui:field="revokeAccess" styleName="{style.clickable}">Switch to
+      Public Access</g:InlineLabel>
+  </g:HTMLPanel>
+</ui:UiBinder>

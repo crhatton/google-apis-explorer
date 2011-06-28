@@ -1,0 +1,51 @@
+{
+ "items": [
+  {
+   "name": "testapi",
+   "version": "v1",
+   "description": "Sample API for testing",
+   "discoveryLink": "https://www.googleapis.com/discovery/v0.3/describe/testapi/v1",
+   "icons": {
+    "x16": "TBD-16",
+    "x32": "TBD-32",
+   },
+   "documentationLink": "TBD",
+   "labels": [
+    "stable",
+    "labs"
+   ],
+   "preferred": false
+  },
+  {
+   "name": "testapi",
+   "version": "v2",
+   "description": "Sample API for testing",
+   "discoveryLink": "https://www.googleapis.com/discovery/v0.3/describe/testapi/v2",
+   "icons": {
+    "x16": "TBD-16",
+    "x32": "TBD-32",
+   },
+   "documentationLink": "TBD",
+   "labels": [
+    "labs"
+   ],
+   "preferred": true
+  },
+  {
+   "name": "anotherapi",
+   "version": "v1.1beta3",
+   "description": "Another sample API for testing",
+   "discoveryLink": "https://www.googleapis.com/discovery/v0.3/describe/anotherapi/v1.1beta3",
+   "icons": {
+    "x16": "TBD-16",
+    "x32": "TBD-32",
+   },
+   "documentationLink": "TBD",
+   "labels": [
+    "labs",
+    "deprecated"
+   ],
+   "preferred": true
+  }
+ ]
+}
