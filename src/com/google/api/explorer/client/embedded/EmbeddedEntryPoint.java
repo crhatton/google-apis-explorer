@@ -16,26 +16,26 @@
 
 package com.google.api.explorer.client.embedded;
 
-import com.google.api.explorer.client.AnalyticsManager;
-import com.google.api.explorer.client.AppState;
+import com.google.api.explorer.client.AnalyticsRequestFinishedCallback;
 import com.google.api.explorer.client.AuthManager;
-import com.google.api.explorer.client.ExplorerEntryPoint;
-import com.google.api.explorer.client.HistoryManager;
 import com.google.api.explorer.client.Resources;
-import com.google.api.explorer.client.ServiceLoader;
-import com.google.api.explorer.client.base.ApiMethod;
+import com.google.api.explorer.client.analytics.AnalyticsManager;
+import com.google.api.explorer.client.analytics.AnalyticsManager.AnalyticsEvent;
+import com.google.api.explorer.client.analytics.AnalyticsManagerImpl;
+import com.google.api.explorer.client.base.ApiRequest;
+import com.google.api.explorer.client.base.ApiResponse;
+import com.google.api.explorer.client.base.ApiService;
 import com.google.api.explorer.client.base.ApiServiceFactory;
 import com.google.api.explorer.client.base.Config;
-import com.google.api.explorer.client.event.AuthGrantedEvent;
-import com.google.api.explorer.client.event.MethodSelectedEvent;
-import com.google.api.explorer.client.event.ServiceLoadedEvent;
-import com.google.api.explorer.client.event.VersionSelectedEvent;
+import com.google.api.explorer.client.base.ExplorerConfig;
+import com.google.api.explorer.client.base.ServiceLoader;
+import com.google.api.explorer.client.history.EmbeddedHistoryItemView;
+import com.google.api.explorer.client.history.JsonPrettifier;
+import com.google.api.explorer.client.routing.URLFragment;
 import com.google.api.gwt.oauth2.client.Auth;
 import com.google.common.collect.Multimap;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -66,28 +66,33 @@ public class EmbeddedEntryPoint implements EntryPoint {
   private static final String PARAMS_ATTR = "data-params";
   private static final String BASE_ATTR = "data-baseUrl";
   private static final String AUTH_POPUP_ATTR = "data-auth-popup";
+  private static final boolean SHOW_AUTH = true;
 
-  static EventBus eventBus;
-  static AppState appState;
+  private RootPanel root;
+  private ServiceLoader serviceLoader;
+  private AuthManager authManager;
+  private AnalyticsManager analytics;
 
   @Override
   public void onModuleLoad() {
-    // Make sure that CSS gets applied.
+    // Make sure that CSS gets injected.
     Resources.INSTANCE.style().ensureInjected();
+    EmbeddedResources.INSTANCE.style().ensureInjected();
 
-    RootPanel root = RootPanel.get(EMBEDDING_ID);
+    root = RootPanel.get(EMBEDDING_ID);
 
     // Try to get the root div, and service/version/method to load. If any are
     // not present, throw an error and give up.
     if (root == null) {
       throw new IllegalStateException("Could not find a suitable drop-in div.");
     }
+
     final Element rootElement = root.getElement();
     String serviceName = rootElement.getAttribute(SERVICE_ATTR);
     String versionName = rootElement.getAttribute(VERSION_ATTR);
-    final String methodName = rootElement.getAttribute(METHOD_ATTR);
+    String methodName = rootElement.getAttribute(METHOD_ATTR);
     String token = rootElement.getAttribute(PARAMS_ATTR);
-    final Multimap<String, String> params = HistoryManager.parseParams(token);
+    final Multimap<String, String> params = URLFragment.parseParams(token);
     if (serviceName.isEmpty() || versionName.isEmpty() || methodName.isEmpty()) {
       throw new IllegalStateException("Could not determine service, version and method to load.");
     }
@@ -98,60 +103,89 @@ public class EmbeddedEntryPoint implements EntryPoint {
       Auth.get().setOAuthWindowUrl(authPopup);
     }
 
+    // Set the base URL if one is given in the embedding div.
+    String base = rootElement.getAttribute(BASE_ATTR);
+    if (base != null && !base.isEmpty()) {
+      Config.setBaseUrl(base);
+    }
+
+    // Set up static resources.
+    JsonPrettifier.setResources(Resources.INSTANCE);
 
     // Set the API key and application name to use for calls from the Explorer.
-    Config.setApiKey(ExplorerEntryPoint.API_KEY);
-    Config.setApplicationName(ExplorerEntryPoint.APP_NAME + " (embedded)");
+    Config.setApiKey(ExplorerConfig.API_KEY);
 
     // Dependencies for the UI
-    eventBus = new SimpleEventBus();
-    appState = new AppState(eventBus);
-    AuthManager authManager = new AuthManager(eventBus, appState);
+    authManager = new AuthManager();
+    serviceLoader = new ServiceLoader(ApiServiceFactory.INSTANCE);
+    analytics = new AnalyticsManagerImpl();
 
-    // These listen for events on the event bus.
-    ServiceLoader serviceLoader =
-        new ServiceLoader(eventBus, Scheduler.get(), ApiServiceFactory.INSTANCE);
-    AnalyticsManager analyticsManager = new AnalyticsManager(eventBus);
+    analytics.trackEventWithValue(AnalyticsEvent.LOAD_EXPLORER, "Embedded");
 
-    // Construct the UI and add it to the page.
-    root.add(new EmbeddedView(eventBus, appState, authManager));
+    loadServiceMethod(serviceName, versionName, methodName, params);
 
-    // Set up a handler to respond to service-loaded events.
-    eventBus.addHandler(ServiceLoadedEvent.TYPE, new ServiceLoadedEvent.Handler() {
+    exportUpdate(this);
+  }
+
+  private void loadServiceMethod(String serviceName, String versionName, final String methodName,
+      final Multimap<String, String> params) {
+    serviceLoader.loadService(serviceName, versionName, new Callback<ApiService, String>() {
       @Override
-      public void onServiceLoaded(ServiceLoadedEvent event) {
-        eventBus.fireEvent(
-            new MethodSelectedEvent(methodName, event.service.method(methodName), params));
+      public void onSuccess(ApiService service) {
+        ShowHistoryCallback callback = new ShowHistoryCallback(analytics);
 
-        String authToken = rootElement.getAttribute("data-oauth2token");
-        if (!authToken.isEmpty()) {
-          eventBus.fireEvent(new AuthGrantedEvent(event.service, authToken));
-        }
+        EmbeddedView view = new EmbeddedView(authManager,
+            service,
+            service.resolveMethod(methodName),
+            params,
+            callback,
+            SHOW_AUTH,
+            analytics);
+
+        callback.localView = view;
+
+        // Construct the UI and add it to the page.
+        root.clear();
+        root.add(view);
+      }
+
+      @Override
+      public void onFailure(String reason) {
+        analytics.trackEvent(AnalyticsEvent.LOAD_DISCOVERY_FAILURE);
       }
     });
+  }
 
-    // Fire an event selecting the correct service/version. ServiceLoader will
-    // see this event and load the service, which will fire an event to call the
-    // above handler, selecting the method.
-    eventBus.fireEvent(new VersionSelectedEvent(serviceName, versionName));
+  private static class ShowHistoryCallback extends AnalyticsRequestFinishedCallback {
+    public EmbeddedView localView;
 
-    exportUpdate();
+    private ShowHistoryCallback(AnalyticsManager analytics) {
+      super(analytics);
+    }
+
+    @Override
+    public void finished(ApiRequest request, ApiResponse response, long startTime, long endTime) {
+      super.finished(request, response, startTime, endTime);
+      EmbeddedHistoryItemView historyItem = new EmbeddedHistoryItemView(request);
+      historyItem.complete(response, endTime - startTime, JsonPrettifier.EXTERNAL_LINK_FACTORY);
+      localView.showHistoryItem(historyItem);
+    }
   }
 
   /**
    * Exports a globally-scoped JS function named 'updateExplorer' that the
    * outer page can call to update the embedded UI.
    */
-  private final native void exportUpdate() /*-{
-    $wnd.updateExplorer = $entry(function(method, token) {
-      @com.google.api.explorer.client.embedded.EmbeddedEntryPoint::update(*)(method, token || "");
+  private final native void exportUpdate(EmbeddedEntryPoint that) /*-{
+    $wnd.updateExplorer = $entry(function(service, version, method, token) {
+      that.
+        @com.google.api.explorer.client.embedded.EmbeddedEntryPoint::update(*)
+        (service, version, method, token || "");
     });
   }-*/;
 
   @SuppressWarnings("unused") // Used in JSNI
-  private static void update(String methodName, String token) {
-    ApiMethod method = appState.getCurrentService().method(methodName);
-    Multimap<String, String> params = HistoryManager.parseParams(token);
-    eventBus.fireEvent(new MethodSelectedEvent(methodName, method, params));
+  private void update(String serviceName, String version, String methodName, String token) {
+    loadServiceMethod(serviceName, version, methodName, URLFragment.parseParams(token));
   }
 }

@@ -1,0 +1,22 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style>
+    .actionImage {
+      vertical-align: middle;
+      margin: 2px;
+      margin-left: 0px;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    <g:HTMLPanel ui:field="placeholder" />
+    <g:FlowPanel styleName="{res.style.requestEditorControl}">
+      <g:Image ui:field="remove" resource="{res.deleteRed}" styleName="{res.style.clickable} {style.actionImage}" />
+    </g:FlowPanel>
+    <g:PopupPanel ui:field="deleteTooltip" autoHideEnabled="true">
+      <g:FlowPanel styleName="{res.style.tooltip}">
+        <g:Label>Remove this array element from the array editor.</g:Label>
+      </g:FlowPanel>
+    </g:PopupPanel>
+  </g:HTMLPanel>
+</ui:UiBinder> 

@@ -27,8 +27,31 @@ import java.util.List;
 public interface Validator {
 
   /**
+   * A single result that encapsulates the results of validation.
+   */
+  public interface ValidationResult {
+    /**
+     * A descriptive type for a validation result.
+     */
+    public enum Type {
+      VALID, INFO, ERROR
+    }
+
+    /**
+     * Returns which type of validation result this is.
+     */
+    Type getType();
+
+    /**
+     * Returns a message associated with the result, if the result type is not
+     * VALID.
+     */
+    String getMessage();
+  }
+
+  /**
    * Returns true if all the values for this {@link Editor} are valid based on
    * this validator's requirements.
    */
-  boolean isValid(List<String> value);
+  ValidationResult isValid(List<String> value);
 }

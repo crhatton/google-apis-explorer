@@ -16,11 +16,8 @@
 
 package com.google.api.explorer.client.embedded;
 
-import com.google.api.explorer.client.AppState;
-import com.google.api.explorer.client.history.HistoryItem;
-import com.google.api.explorer.client.history.HistoryPanelPresenter;
+import com.google.api.explorer.client.history.EmbeddedHistoryItemView;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,12 +25,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * View to display and manage {@link HistoryItem}s for requests that have been
+ * View to display and manage {@link EmbeddedHistoryItemView}s for requests that have been
  * made.
  *
  * @author jasonhall@google.com (Jason Hall)
  */
-public class EmbeddedHistoryPanel extends Composite implements HistoryPanelPresenter.Display {
+public class EmbeddedHistoryPanel extends Composite {
 
   private static EmbeddedHistoryPanelUiBinder uiBinder =
       GWT.create(EmbeddedHistoryPanelUiBinder.class);
@@ -41,31 +38,19 @@ public class EmbeddedHistoryPanel extends Composite implements HistoryPanelPrese
   interface EmbeddedHistoryPanelUiBinder extends UiBinder<Widget, EmbeddedHistoryPanel> {
   }
 
-  @UiField SimplePanel panel;
+  @UiField
+  SimplePanel panel;
 
-  public EmbeddedHistoryPanel(EventBus eventBus, AppState appState) {
+  public EmbeddedHistoryPanel() {
     initWidget(uiBinder.createAndBindUi(this));
-    new HistoryPanelPresenter(eventBus, appState, this);
   }
 
-  @Override
   public void clear() {
     panel.clear();
     panel.setVisible(false);
   }
 
-  @Override
-  public int getItemCount() {
-    return 1;
-  }
-
-  @Override
-  public void removeItem(int index) {
-    // No-op.
-  }
-
-  @Override
-  public void insertAtTop(HistoryItem item) {
+  public void setHistoryItemView(EmbeddedHistoryItemView item) {
     panel.clear();
     panel.setVisible(true);
     panel.add(item);

@@ -17,21 +17,28 @@
 package com.google.api.explorer.client.auth;
 
 import com.google.api.explorer.client.AuthManager;
+import com.google.api.explorer.client.AuthManager.AuthCompleteCallback;
+import com.google.api.explorer.client.AuthManager.AuthToken;
+import com.google.api.explorer.client.analytics.AnalyticsManager;
 import com.google.api.explorer.client.auth.AuthPresenter.Display;
 import com.google.api.explorer.client.auth.AuthPresenter.Display.State;
 import com.google.api.explorer.client.base.ApiMethod;
 import com.google.api.explorer.client.base.ApiService;
-import com.google.api.explorer.client.event.AuthGrantedEvent;
-import com.google.api.explorer.client.event.AuthRequestedEvent;
-import com.google.api.explorer.client.event.ServiceLoadedEvent;
-import com.google.api.explorer.client.event.ServiceSelectedEvent;
+import com.google.api.explorer.client.base.ApiService.AuthInformation;
+import com.google.api.explorer.client.base.ApiService.AuthScope;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
 import junit.framework.TestCase;
 
+import org.easymock.Capture;
 import org.easymock.EasyMock;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Tests for {@link AuthPresenter}.
@@ -40,79 +47,105 @@ import org.easymock.EasyMock;
  */
 public class AuthPresenterTest extends TestCase {
 
-  private EventBus eventBus;
-  private Display display;
-  private AuthManager authManager;
-  private AuthPresenter presenter;
+  private static final Set<String> EMPTY_SCOPES = Collections.emptySet();
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-
-    eventBus = new SimpleEventBus();
-    display = EasyMock.createControl().createMock(Display.class);
-    authManager = EasyMock.createControl().createMock(AuthManager.class);
-    presenter = new AuthPresenter(eventBus, authManager, display);
-  }
+  private final Display display = EasyMock.createMock(Display.class);
+  private final AuthManager authManager = EasyMock.createStrictMock(AuthManager.class);
+  private final ApiService service = EasyMock.createControl().createMock(ApiService.class);
+  private final AnalyticsManager analytics =
+      EasyMock.createControl().createMock(AnalyticsManager.class);
 
   /**
    * When a ServiceLoadedEvent fires, the Display becomes visible and displays
    * the user as un-authenticated by default.
    */
-  public void testServiceLoaded_onlyPublic() {
-    ApiService service = EasyMock.createControl().createMock(ApiService.class);
+
+  public void testServiceLoadedWithoutAuth() {
     ApiMethod method1 = EasyMock.createControl().createMock(ApiMethod.class);
     ApiMethod method2 = EasyMock.createControl().createMock(ApiMethod.class);
     EasyMock.expect(service.allMethods()).andReturn(
         ImmutableMap.of("method.one", method1, "method.two", method2));
     EasyMock.expect(service.getName()).andReturn("service");
-    display.setState(State.ONLY_PUBLIC);
+    display.setScopes(Collections.<String, ApiService.AuthScope>emptyMap());
+    display.setState(State.PUBLIC, EMPTY_SCOPES, EMPTY_SCOPES);
+    display.preSelectScopes(EMPTY_SCOPES);
     EasyMock.replay(display);
 
-    eventBus.fireEvent(new ServiceLoadedEvent(service));
+    @SuppressWarnings("unused")
+    AuthPresenter presenter = new AuthPresenter(service, authManager, analytics, display);
+
     EasyMock.verify(display);
   }
 
-  /** When an AuthGrantedEvent fires, the Display displays as authenticated. */
+  /** Check the flow which sets up the display for auth. */
   public void testAuthGranted() {
-    ApiService service = EasyMock.createControl().createMock(ApiService.class);
     ApiMethod method1 = EasyMock.createControl().createMock(ApiMethod.class);
     ApiMethod method2 = EasyMock.createControl().createMock(ApiMethod.class);
-    EasyMock.expect(service.getName()).andReturn("buzz");
-    EasyMock.expect(service.allMethods()).andReturn(
-        ImmutableMap.of("method.one", method1, "method.two", method2));
-    EasyMock.expect(service.getName()).andReturn("service");
-    display.setState(State.ONLY_PUBLIC);
-    display.setState(State.PRIVATE);
-    EasyMock.replay(display);
+    EasyMock.expect(method1.getScopes()).andReturn(ImmutableList.of("scopeName")).anyTimes();
+    ImmutableSet<String> authScopes = ImmutableSet.of("scopeName");
+    Map<String, AuthInformation> auth = generateAuthInformation(authScopes);
+    EasyMock.expect(service.getAuth()).andReturn(auth).anyTimes();
 
-    eventBus.fireEvent(new ServiceLoadedEvent(service));
-    eventBus.fireEvent(new AuthGrantedEvent(service, "fakefakefake"));
+    // This is called once for every call to the presenter.
+    display.setScopes(auth.get("oauth2").getScopes());
+    EasyMock.expectLastCall().times(2);
+
+    // When the presenter is created these will be called.
+    display.setState(State.PUBLIC, EMPTY_SCOPES, EMPTY_SCOPES);
+    EasyMock.expectLastCall();
+    display.preSelectScopes(EMPTY_SCOPES);
+    EasyMock.expectLastCall();
+    EasyMock.expect(authManager.getToken(service)).andReturn(null).times(2);
+
+    // When the method is set, these will be called.
+    EasyMock.expect(display.getSelectedScopes()).andReturn(authScopes);
+    final Capture<AuthCompleteCallback> cbCapture = new Capture<AuthCompleteCallback>();
+    authManager.requestAuth(
+        EasyMock.eq(service), EasyMock.eq(authScopes), EasyMock.capture(cbCapture));
+    EasyMock.expectLastCall();
+
+    display.setState(State.PUBLIC, authScopes, EMPTY_SCOPES);
+    EasyMock.expectLastCall();
+    display.preSelectScopes(authScopes);
+    EasyMock.expectLastCall();
+
+    // When execute auth is clicked, these will be called.
+    display.hideScopeDialog();
+    EasyMock.expectLastCall();
+    display.setState(State.PRIVATE, authScopes, authScopes);
+    EasyMock.expectLastCall();
+
+    AuthToken token = EasyMock.createMock(AuthToken.class);
+    EasyMock.expect(token.getScopes()).andReturn(authScopes);
+    EasyMock.expect(authManager.getToken(service)).andReturn(token);
+
+    EasyMock.replay(service, display, method1, method2, authManager, token);
+
+    AuthPresenter presenter = new AuthPresenter(service, authManager, analytics, display);
+    presenter.setStateForMethod(method1);
+    presenter.clickExecuteAuth();
+    cbCapture.getValue().complete(token);
+
     EasyMock.verify(display);
   }
 
-  /** Clicking the "Authenticate" link fires an AuthRequestedEvent. */
-  public void testClickAuthLink() {
-    AuthRequestedEvent.Handler handler =
-        EasyMock.createControl().createMock(AuthRequestedEvent.Handler.class);
-    eventBus.addHandler(AuthRequestedEvent.TYPE, handler);
+  private Map<String, AuthInformation> generateAuthInformation(Set<String> scopes) {
+    Map<String, AuthScope> authScopes = Maps.newHashMap();
 
-    EasyMock.expect(display.getSelectedScope()).andReturn("scope");
-    handler.onAuthRequested(new AuthRequestedEvent("scope"));
-    EasyMock.replay(handler, display);
+    for (String scopeName : scopes) {
+      AuthScope mockScope = EasyMock.createMock(AuthScope.class);
+      EasyMock.replay(mockScope);
+      authScopes.put(scopeName, mockScope);
+    }
 
-    presenter.clickAuthLink();
-    EasyMock.verify(handler, display);
-  }
+    AuthInformation mockAuth = EasyMock.createMock(AuthInformation.class);
+    EasyMock.expect(mockAuth.getScopes()).andReturn(authScopes).anyTimes();
 
-  /**
-   * When a ServiceSelectedEvent fires, the auth control goes to its ONLY_PUBLIC state.
-   */
-  public void testServiceSelected() {
-    display.setState(State.ONLY_PUBLIC);
-    EasyMock.replay(display);
+    EasyMock.replay(mockAuth);
 
-    eventBus.fireEvent(new ServiceSelectedEvent("service"));
-    EasyMock.verify(display);
+    Map<String, AuthInformation> auth = Maps.newHashMap();
+    auth.put("oauth2", mockAuth);
+
+    return auth;
   }
 }

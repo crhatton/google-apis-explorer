@@ -1,0 +1,71 @@
+{
+  "name" : "moderator",
+  "version" : "v1",
+  "description" : "Moderator API",
+  "basePath" : "/moderator/v1",
+  "rpcPath" : "/rpc",
+  "schemas": {
+    "Type": {
+      "properties": {
+        "kind": {
+          "default": "moderator#type"
+        }
+      }
+    }
+  },
+  "methods": {
+    "get": {
+      "id": "moderator.get",
+      "path": "/get/{param}",
+      "rpcMethod": "moderator.get",
+      "httpMethod": "GET",
+      "parameters": {
+        "param": {
+          "required": false
+        }
+      },
+      "request": {
+        "$ref": "Type"
+      }
+    }
+  },
+  "resources": {
+    "series": {
+      "resources": {
+        "my": {
+          "methods": {
+            "get": {
+              "id": "moderator.series.my.get",
+              "path": "/series/my/{seriesId}",
+              "rpcMethod": "moderator.series.my.get",
+              "httpMethod": "GET",
+              "parameters": {
+                "seriesId": {
+                  "pattern": "(foo|bar)",
+                  "required": false
+                }
+              },
+              "request": {
+                "$ref": "Type"
+              }
+            }
+          }
+        }
+      },
+      "methods": {
+        "get": {
+          "id": "moderator.series.get",
+          "path": "/series/{seriesId}",
+          "rpcMethod": "moderator.series.get",
+          "httpMethod": "GET",
+          "parameters": {
+            "seriesId": {
+              "pattern": "[^/]+",
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

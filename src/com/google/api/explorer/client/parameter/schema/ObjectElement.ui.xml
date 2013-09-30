@@ -1,0 +1,44 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style>
+    .placeholder {
+      display: inline;
+    }
+    
+    .actionImage {
+      vertical-align: middle;
+      margin: 2px;
+    }
+    
+    .required {
+      margin-top: 20px;
+      color: #DD4B39;
+    }
+  </ui:style>
+  <g:FlowPanel ui:field="panel">
+    <g:InlineLabel ui:field="label" />
+    <g:InlineLabel>:</g:InlineLabel>
+    <g:Image ui:field="info" resource="{res.question}" styleName="{res.style.clickable} {style.actionImage}" visible="false"/>
+    <g:InlineLabel ui:field="nullify" styleName="{res.style.nullifyButton} {res.style.clickable}">null</g:InlineLabel>
+    <g:Image ui:field="remove" resource="{res.deleteRed}" styleName="{res.style.clickable} {style.actionImage}" />
+    <g:HTMLPanel ui:field="placeholder" styleName="{style.placeholder}" />
+    <g:InlineLabel ui:field="nullText" visible="false" styleName="{res.style.nullTextClickable}">null</g:InlineLabel>
+    <g:PopupPanel ui:field="docsTooltip" autoHideEnabled="true">
+      <g:FlowPanel styleName="{res.style.tooltip}">
+        <g:Label ui:field="description" />
+        <g:Label ui:field="required" styleName="{style.required}">This property is required for this method.</g:Label>
+      </g:FlowPanel>
+    </g:PopupPanel>
+    <g:PopupPanel ui:field="patchTooltip" autoHideEnabled="true">
+      <g:FlowPanel styleName="{res.style.tooltip}">
+        <g:Label>Explicitly set this property to null, which will clear this value and all sub-values for the corresponding resource on the server.</g:Label>
+      </g:FlowPanel>
+    </g:PopupPanel>
+    <g:PopupPanel ui:field="deleteTooltip" autoHideEnabled="true">
+      <g:FlowPanel styleName="{res.style.tooltip}">
+        <g:Label>Remove this property from the editor.</g:Label>
+      </g:FlowPanel>
+    </g:PopupPanel>
+  </g:FlowPanel>
+</ui:UiBinder>

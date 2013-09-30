@@ -1,0 +1,25 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style>
+    .remove {
+      font-family: sans-serif;
+      font-size: .7em;
+      vertical-align: bottom;
+    }
+
+    input[type="text"].keyField {
+      width: 8em;
+    }
+
+    .placeholder {
+      display: inline;
+    }
+  </ui:style>
+  <g:HTMLPanel ui:field="panel">
+    <g:TextBox ui:field="keyInput" styleName="{style.keyField}"/>:
+    <g:InlineLabel ui:field="remove" styleName="{res.style.clickable} {style.remove}">
+      Remove</g:InlineLabel>
+    <g:HTMLPanel ui:field="placeholder" styleName="{style.placeholder}" />
+  </g:HTMLPanel>
+</ui:UiBinder>

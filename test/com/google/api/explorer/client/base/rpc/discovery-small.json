@@ -1,0 +1,82 @@
+{
+  "name": "moderator",
+  "version": "v1",
+  "description": "Moderator API",
+  "basePath": "/moderator/v1",
+  "rpcPath": "/rpc",
+  "rootUrl": "http://www.googleapis.com/",
+  "rpcUrl": "http://www.googleapis.com/rpc",
+  "schemas": {
+    "GetResponse": {
+      "id": "GetResponse",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "auth": {
+    "oauth2": {
+      "scopes": {
+        "https://www.googleapis.com/auth/scopename": {
+          "description": "Sample OAuth2 scope."
+        }
+      }
+    }
+  },
+  "methods": {
+    "moderator.get": {
+      "id": "moderator.get",
+      "parameterOrder": [
+      ],
+      "parameters": {
+        "param": {
+          "required": false
+        }
+      },
+      "returns": {
+        "$ref": "GetResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/scopename"
+      ]
+    },
+    "moderator.series.my.get": {
+      "id": "moderator.series.my.get",
+      "parameterOrder": [
+      ],
+      "parameters": {
+        "seriesId": {
+          "pattern": "(foo|bar)",
+          "required": false
+        }
+      },
+      "returns": {
+        "$ref": "GetResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/scopename"
+      ]
+    },
+    "moderator.series.get": {
+      "id": "moderator.series.get",
+      "parameterOrder": [
+        "seriesId"
+      ],
+      "parameters": {
+        "seriesId": {
+          "pattern": "[^/]+",
+          "required": true
+        }
+      },
+      "returns": {
+        "$ref": "GetResponse"
+      },
+      "scopes": [
+        "https://www.googleapis.com/auth/scopename"
+      ]
+    }
+  }
+}

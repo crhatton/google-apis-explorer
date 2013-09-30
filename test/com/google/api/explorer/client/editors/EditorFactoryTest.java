@@ -16,14 +16,17 @@
 
 package com.google.api.explorer.client.editors;
 
-import com.google.api.explorer.client.base.ApiParameter;
-import com.google.api.explorer.client.base.ApiParameter.Type;
+import com.google.api.explorer.client.base.Schema;
+import com.google.api.explorer.client.base.Schema.Type;
+import com.google.api.explorer.client.base.TestUrlEncoder;
+import com.google.api.explorer.client.base.UrlEncoder;
 import com.google.api.explorer.client.editors.EditorFactory.DecimalValidator;
 import com.google.api.explorer.client.editors.EditorFactory.IntegerValidator;
 import com.google.api.explorer.client.editors.EditorFactory.MinimumMaximumValidator;
 import com.google.api.explorer.client.editors.EditorFactory.PatternValidator;
 import com.google.api.explorer.client.editors.EditorFactory.RequiredValidator;
 import com.google.api.explorer.client.editors.EnumEditor.EnumValidator;
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,9 +47,12 @@ public class EditorFactoryTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    // Even though this functionality is not ready to be released, we still want
-    // to be able to test it.
-    EditorFactory.enableRepeatedParameters = true;
+    EditorFactory.urlEncoder = new TestUrlEncoder();
+  }
+
+  @Override
+  protected void tearDown() {
+    EditorFactory.urlEncoder = UrlEncoder.DEFAULT;
   }
 
   /** A simple parameter (no restrictions) results in a BasicEditor. */
@@ -58,11 +64,24 @@ public class EditorFactoryTest extends TestCase {
     assertEquals(ImmutableList.of("abc"), editor.getValue());
   }
 
+  /** Test the URL encoder validator is properly detecting encoding conditions. */
+  public void testEditorFactory_encoded() {
+    Editor editor = createParameter(false, Type.STRING, null, null, null, null, false, null);
+    assertTrue(editor instanceof BasicEditor);
+
+    editor.setValue(ImmutableList.of("abcdef"));
+    assertEquals(ValidationResult.Type.VALID, editor.isValid().getType());
+
+    editor.setValue(ImmutableList.of("abc/def"));
+    assertEquals(ImmutableList.of("abc/def"), editor.getValue());
+    assertEquals(ValidationResult.Type.INFO, editor.isValid().getType());
+  }
+
   /** A required parameter results in a BasicEditor with a RequiredValidator. */
   public void testEditorFactory_required() {
     Editor editor = createParameter(false, Type.STRING, null, null, null, null, true, null);
     assertTrue(editor instanceof BasicEditor);
-    assertEquals(1, editor.validators.size());
+    assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof RequiredValidator);
 
     // No value given.
@@ -82,7 +101,7 @@ public class EditorFactoryTest extends TestCase {
   public void testEditorFactory_pattern() {
     Editor editor = createParameter(false, Type.STRING, null, null, null, null, false, "[0-9]+");
     assertTrue(editor instanceof BasicEditor);
-    assertEquals(1, editor.validators.size());
+    assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof PatternValidator);
     assertEquals("[0-9]+", ((PatternValidator) editor.validators.get(0)).pattern);
 
@@ -99,9 +118,9 @@ public class EditorFactoryTest extends TestCase {
     assertTrue(editor instanceof EnumEditor);
     assertEquals(ImmutableList.of("true", "false"), ((EnumEditor) editor).enumValues);
     assertNull(((EnumEditor) editor).enumDescriptions);
-    assertEquals(1, editor.validators.size());
+    assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof EnumValidator);
-    
+
     assertValid(editor, "");
     assertValid(editor, "true");
     assertValid(editor, "false");
@@ -114,7 +133,7 @@ public class EditorFactoryTest extends TestCase {
   public void testEditorFactory_integer() {
     Editor editor = createParameter(false, Type.INTEGER, null, null, null, null, false, null);
     assertTrue(editor instanceof BasicEditor);
-    assertEquals(1, editor.validators.size());
+    assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof IntegerValidator);
 
     assertValid(editor, "");
@@ -132,7 +151,7 @@ public class EditorFactoryTest extends TestCase {
   public void testEditorFactory_integerMinMax() {
     Editor editor = createParameter(false, Type.INTEGER, null, null, "1", "10", false, null);
     assertTrue(editor instanceof BasicEditor);
-    assertEquals(2, editor.validators.size());
+    assertEquals(3, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof IntegerValidator);
     assertTrue(editor.validators.get(1) instanceof MinimumMaximumValidator);
 
@@ -148,9 +167,9 @@ public class EditorFactoryTest extends TestCase {
    * An integer parameter results in a BasicEditor with an IntegerValidator
    */
   public void testEditorFactory_decimal() {
-    Editor editor = createParameter(false, Type.DECIMAL, null, null, null, null, false, null);
+    Editor editor = createParameter(false, Type.NUMBER, null, null, null, null, false, null);
     assertTrue(editor instanceof BasicEditor);
-    assertEquals(1, editor.validators.size());
+    assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof DecimalValidator);
 
     assertValid(editor, "");
@@ -180,7 +199,7 @@ public class EditorFactoryTest extends TestCase {
     assertEquals(ImmutableList.of("foo", "bar"), ((EnumEditor) editor).enumValues);
     assertEquals(ImmutableList.of("Foo desc", "Bar desc"), ((EnumEditor) editor).enumDescriptions);
 
-    assertEquals(1, editor.validators.size());
+    assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof EnumValidator);
 
     assertValid(editor, "foo");
@@ -193,31 +212,7 @@ public class EditorFactoryTest extends TestCase {
     assertTrue(editor instanceof RepeatedEditor);
     assertTrue(((RepeatedEditor) editor).innerEditor instanceof BasicEditor);
     assertEquals(0, editor.validators.size());
-    assertEquals(0, ((RepeatedEditor) editor).innerEditor.validators.size());
-  }
-
-  /**
-   * When the repeated parameters UI is disabled, isRepeated() is never called
-   * and the parameter results in a BasicEditor.
-   */
-  // TODO(jasonhall): Remove this test when the enableRepeatedParameters flag is
-  // removed.
-  public void testEditorFactory_repeatedDisabled() {
-    EditorFactory.enableRepeatedParameters = false;
-    ApiParameter parameter = EasyMock.createControl().createMock(ApiParameter.class);
-    EasyMock.expect(parameter.getType()).andReturn(Type.STRING);
-    EasyMock.expect(parameter.getEnumValues()).andReturn(null);
-    EasyMock.expect(parameter.getEnumDescriptions()).andReturn(null);
-    EasyMock.expect(parameter.getMinimum()).andReturn(null);
-    EasyMock.expect(parameter.getMaximum()).andReturn(null);
-    EasyMock.expect(parameter.isRequired()).andReturn(false);
-    EasyMock.expect(parameter.getPattern()).andReturn(null);
-    EasyMock.replay(parameter);
-
-    Editor editor = EditorFactory.forParameter(parameter);
-    EasyMock.verify(parameter);
-
-    assertTrue(editor instanceof BasicEditor);
+    assertEquals(1, ((RepeatedEditor) editor).innerEditor.validators.size());
   }
 
   /**
@@ -239,7 +234,7 @@ public class EditorFactoryTest extends TestCase {
     Editor innerEditor = ((RepeatedEditor) editor).innerEditor;
     assertTrue(innerEditor instanceof EnumEditor);
 
-    assertEquals(3, innerEditor.validators.size());
+    assertEquals(4, innerEditor.validators.size());
     assertTrue(innerEditor.validators.get(0) instanceof EnumValidator);
     assertTrue(innerEditor.validators.get(1) instanceof RequiredValidator);
     assertTrue(innerEditor.validators.get(2) instanceof PatternValidator);
@@ -271,7 +266,7 @@ public class EditorFactoryTest extends TestCase {
       String maximum,
       boolean required,
       String pattern) {
-    ApiParameter parameter = EasyMock.createControl().createMock(ApiParameter.class);
+    Schema parameter = EasyMock.createControl().createMock(Schema.class);
     EasyMock.expect(parameter.isRepeated()).andReturn(repeated);
     EasyMock.expect(parameter.getType()).andReturn(type);
     EasyMock.expect(parameter.getEnumValues()).andReturn(enumValues);
@@ -294,13 +289,13 @@ public class EditorFactoryTest extends TestCase {
   /** Asserts that if the editor is given the value(s), it will be valid. */
   private static void assertValid(Editor editor, String... values) {
     editor.setValue(ImmutableList.copyOf(values));
-    assertTrue(editor.isValid());
+    assertTrue(editor.isValid().getType() == ValidationResult.Type.VALID);
   }
 
   /** Asserts that if the editor is given the value(s), it will be invalid. */
   private static void assertInvalid(Editor editor, String... values) {
     editor.setValue(ImmutableList.copyOf(values));
-    assertFalse(editor.isValid());
+    assertFalse(editor.isValid().getType() == ValidationResult.Type.VALID);
   }
 
   private static class MockEditorView implements EditorView {
@@ -326,7 +321,7 @@ public class EditorFactoryTest extends TestCase {
     }
 
     @Override
-    public void displayValidation(boolean valid) {
+    public void displayValidation(ValidationResult valid) {
     }
   }
 }

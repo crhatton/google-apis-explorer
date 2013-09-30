@@ -29,59 +29,112 @@ import java.util.Map;
  * @author jasonhall@google.com (Jason Hall)
  */
 public class ApiResponse {
+  /**
+   * Class to store a key and value of a header.
+   *
+   */
+  public static class HeaderValue {
+    final String key;
+    final String value;
 
-  /** The body of the response. */
-  public final String body;
+    /**
+     * Create a new header with the specified key and value.
+     */
+    public HeaderValue(String key, String value) {
+      this.key = key;
+      this.value = value;
+    }
 
-  /** A {@link Map} of response header keys and values. */
-  public final Map<String, String> headers;
+    /**
+     * Returns the key.
+     */
+    public String getKey() {
+      return key;
+    }
 
-  /** HTTP status code of the response. */
-  public final int status;
+    /**
+     * Returns the value.
+     */
+    public String getValue() {
+      return value;
+    }
+  }
 
-  /** Text of the HTTP status. */
-  public final String statusText;
+  /** The response object */
+  private DynamicJso object;
 
-  private ApiResponse(String body, Map<String, String> headers, int status, String statusText) {
-    this.body = body;
-    this.headers = headers;
-    this.status = status;
-    this.statusText = statusText;
+  /**
+   * A {@link Map} of normalized lower case response header keys to tuples
+   * containing the original key and the value.
+   */
+  private final Map<String, HeaderValue> headers;
+
+  private ApiResponse(DynamicJso object) {
+    this.object = object;
+    this.headers = createHeadersMap(object);
+  }
+
+  /** Returns the value of the body element as a String. */
+  public String getBodyAsString() {
+    return object.getString("body");
+  }
+
+  /** Returns the status code of the response. */
+  public int getStatus() {
+    return object.getInteger("status");
+  }
+
+  /** Returns the text associated with the status code. */
+  public String getStatusText() {
+    return object.getString("statusText");
+  }
+
+  /**
+   * Returns a map of normalized lower case header keys, associated with a tuple
+   * containing the original key and the value.
+   */
+  public Map<String, HeaderValue> getHeaders() {
+    return headers;
   }
 
   /** Instantiates a response from the JS object representation of a response. */
   public static ApiResponse fromData(JavaScriptObject data) {
     DynamicJso jso = data.cast();
 
-    return new ApiResponse(jso.getString("body"), createHeadersMap(jso), jso.getInteger("status"),
-        jso.getString("statusText"));
+    return new ApiResponse(jso);
   }
 
   /**
    * Inspects the headers object of the given JS object and constructs a
    * {@link Map} of its keys and values.
    */
-  private static Map<String, String> createHeadersMap(DynamicJso data) {
+  private static Map<String, HeaderValue> createHeadersMap(DynamicJso data) {
     DynamicJso headers = data.get("headers");
     JsArrayString keys = headers.keys();
-    Map<String, String> headersMap = Maps.newHashMapWithExpectedSize(keys.length());
+    Map<String, HeaderValue> headersMap = Maps.newHashMapWithExpectedSize(keys.length());
 
     for (int i = 0; i < keys.length(); i++) {
       String key = keys.get(i);
+      String value = "";
       switch (headers.typeofKey(key)) {
         case STRING:
-          headersMap.put(key, headers.getString(key));
+          value = headers.getString(key);
           break;
+
         case BOOLEAN:
-          headersMap.put(key, String.valueOf(headers.getBoolean(key)));
+          value = String.valueOf(headers.getBoolean(key));
           break;
+
         case NUMBER:
-          headersMap.put(key, String.valueOf(headers.getInteger(key)));
+          value = String.valueOf(headers.getInteger(key));
           break;
+
         case INTEGER:
-          headersMap.put(key, String.valueOf(headers.getDouble(key)));
+          value = String.valueOf(headers.getDouble(key));
           break;
       }
+      headersMap.put(key.toLowerCase(), new HeaderValue(key, value));
+
     }
     return headersMap;
   }

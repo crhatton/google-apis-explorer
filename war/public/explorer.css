@@ -4,7 +4,7 @@
 
 @sprite .expanded {
   gwt-image: 'collapse';
-  background: transparent collapsedUrl no-repeat;
+  background: transparent expandeddUrl no-repeat;
   background-position: 2px 5px;
   padding-left: 15px;
 }
@@ -14,6 +14,14 @@
   background: transparent collapsedUrl no-repeat;
   background-position: 2px 5px;
   padding-left: 15px;
+}
+
+@sprite .checked {
+  gwt-image: 'checkmark';
+  background: transparent checkedUrl no-repeat;
+  background-position: 3px 10px;
+  width: auto;
+  height: auto;
 }
 
 @sprite .loading {
@@ -41,6 +49,18 @@
   background-position: 50% 50%;
 }
 
+@sprite .settingsButton {
+  gwt-image: 'settingsButton';
+  background-position: 50% 50%;
+  width: 70px;
+  height: 29px;
+  opacity: .5;
+}
+
+.settingsButton:hover {
+  opacity: 1;
+}
+
 .parameterFormNameCell {
   padding-top: 4px !important;
   padding-right: 0 !important;
@@ -66,8 +86,7 @@
   color: #800;
 }
 
-.jsonNumber,
-.jsonBoolean {
+.jsonNumber,.jsonBoolean {
   color: #008;
 }
 
@@ -75,7 +94,7 @@
   color: #080;
 }
 
-a.jsonStringLink{
+a.jsonStringLink {
   color: #4272DB;
 }
 
@@ -87,13 +106,77 @@ a.jsonStringLink{
   color: #4272DB;
 }
 
-.jsonKey,
-.jsonObject,
-.jsonArray {
+.jsonKey,.jsonObject,.jsonArray {
   /* Reserved for future use. */
 }
 
+.reusableResourceButton {
+  position: absolute;
+  right: 0;
+  display: inline-block;
+  vertical-align: middle;
+  background-color: #F5F5F5;
+  border: 1px solid rgba(0,0,0,0.1);
+  color: #444444;
+  border-radius: 2px;
+  font-size: 11px;
+  height: 11px;
+  padding: 0px 5px;
+}
+
+.reusableResourceButton img {
+  opacity: .5;
+}
+
+.dropDownMenuPopup {
+  border: 1px solid #D9D9D9;
+}
+
+.dropDownMenuItem {
+  white-space: nowrap;
+  background-color: white;
+  padding: 10px 10px 10px 10px;
+}
+
+.selectableDropDownMenuItem {
+  padding-left: 30px;
+}
+
+.selectableDropDownMenuItem:hover {
+  background-color: #F1F1F1;
+  cursor: pointer;
+}
+
+.reusableResource {
+  display: inline-block;
+  padding-right: 33px;
+  position: relative;
+}
+
+.reusableResource:hover {
+  background-color: #EBF2FE;
+}
+
+@sprite .jsonExpanded {
+  gwt-image: 'collapseJson';
+  background: transparent collapsedUrl no-repeat;
+  background-position: 2px 4px;
+  padding-left: 11px;
+  margin-left: -11px;
+  cursor: pointer;
+}
+
+@sprite .jsonCollapsed {
+  gwt-image: 'expandJson';
+  background: transparent collapsedUrl no-repeat;
+  background-position: 2px 4px;
+  padding-left: 11px;
+  margin-left: -11px;
+  cursor: pointer;
+}
+
 .responseLine {
+  /* Reserved for future use. */
 }
 
 .addParameter {
@@ -101,7 +184,7 @@ a.jsonStringLink{
   color: #4272DB;
   position: relative;
   float: right;
-  margin-bottom: -18px;
+  margin-top: -24px;
   padding-top: 3px;
   padding-right: 5px;
   -moz-user-select: none;
@@ -117,6 +200,180 @@ a.jsonStringLink{
   padding-right: 5px;
 }
 
-.invalidParameter {
-  background-color: #ffb2b2;
+.invalidParameter input {
+  border: 2px solid #DD4B39 !important;
+}
+
+.invalidParameter div {
+  color: #DD4B39;
+  padding-top: 3px;
+}
+
+.infoParameter input {
+  border: 2px solid #f0c36d !important;
+}
+
+.infoParameter div {
+  color: #666;
+  padding-top: 3px;
+}
+
+.clickable {
+  color: #4272DB;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.requestEditorControl {
+  height: 20px;
+}
+
+    
+.nullTextClickable {
+  cursor: pointer;
+  color: #15C;
+  margin-right: 10px;
+}
+
+.nullifyButton {
+  background-color: #3D9400;
+  color: white;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 0px 3px;
+  text-decoration: none;
+  margin: 2px;
+  display: inline-block;
+  height: 12px;
+}
+
+.tooltip {
+  border: 1px solid #C4C4C4;
+  background: white;
+  -webkit-box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  padding: 20px;
+  color: #777;
+  max-width: 50%;
+}
+
+/*
+ Tag style definitions
+ */
+.tag {
+  font-size: 11px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 1px 5px;
+  margin-right: 5px;
+} 
+ 
+.defaultTag {
+  color: #666666;
+  background-color: #DDDDDD;
+}
+
+.limitedTag {
+  color: black;
+  background-color: #F9EDBE;
+}
+
+/*
+ External (uncompiled) CSS rules
+ */
+
+html, body {
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+}
+
+@external .gwt-SuggestBoxPopup, .item, .item-selected, .gwt-TabBarItem, .gwt-TabBarItem-selected,
+          .gwt-TabBarItem-disabled, .gwt-TabPanelBottom, .gwt-DisclosurePanel, .header,
+          .suggestPopupMiddleLeft, .suggestPopupMiddleRight, .suggestPopupTop, .suggestPopupBottom,
+          .gwt-MenuBar-horizontal, .gwt-MenuBar, .gwt-MenuBar-vertical, .gwt-MenuItem,
+          .gwt-MenuBarPopup;
+
+/* These must have the div element to have equal specificity to the devsite table rules. */
+div.gwt-SuggestBoxPopup {
+  border: 1px solid #666;
+  background-color: #FFF;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+div.gwt-SuggestBoxPopup table {
+  border-spacing: 0 0;
+  margin: 0px;
+  border: 0;
+}
+
+div.gwt-SuggestBoxPopup table td {
+  border-spacing: 0 0;
+  padding: 0px;
+  border: 0;
+}
+
+div.gwt-SuggestBoxPopup .item-selected {
+  background-color: #EEEEEE;
+}
+
+div.gwt-SuggestBoxPopup {
+  border: 1px solid #B8B8B8;
+}
+
+div.gwt-SuggestBoxPopup td.item {
+  max-width: 700px;
+  white-space: normal !important;
+  height: 25px;
+  padding: 5px 12px;
+}
+
+.gwt-DisclosurePanel .header {
+  color: #222222;
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding-top: 20px;
+}
+
+.suggestPopupTop,
+.suggestPopupMiddleLeft,
+.suggestPopupBottom,
+.suggestPopupMiddleRight {
+  display: none;
+}
+
+.gwt-MenuBar-horizontal {
+  display: inline-block;
+  background-color: #F1F1F1;
+  border: 1px solid #E5E5E5;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.gwt-MenuBar-horizontal:hover {
+  border-color: #C6C6C6;
+}
+
+
+.gwt-MenuBar-horizontal .gwt-MenuItem {
+  padding: 0px;
+}
+
+.gwt-MenuBar table {
+  border-spacing: 0px;
+}
+
+.gwt-MenuBar-vertical {
+  background-color: white;
+  border: 1px solid #E5E5E5;
+}
+
+.gwt-MenuBar-vertical .gwt-MenuItem {
+  padding: 10px;
+}
+
+.gwt-MenuBar-vertical .gwt-MenuItem:hover {
+  background-color: #F1F1F1;
+  cursor: pointer;
 }

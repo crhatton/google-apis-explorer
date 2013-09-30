@@ -18,11 +18,14 @@ package com.google.api.explorer.client.base.http.crossdomain;
 
 import com.google.api.explorer.client.base.ApiRequest;
 import com.google.api.explorer.client.base.ApiResponse;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.ScriptElement;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import java.util.List;
 
 /**
  * Builds requests to make to an cross-domain proxy iframe.
@@ -36,14 +39,31 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class CrossDomainRequestBuilder {
 
-  private static final String JS_CLIENT_NAME = "ae_f85e3bd0744c7080861c3ae42085d071.js";
-  private static final String JS_CLIENT_URL = "https://ssl.gstatic.com/gb/js/" + JS_CLIENT_NAME;
+  private static final String JS_CLIENT_URL =
+      "https://apis.google.com/js/client.js?onload=__apis_explorer_load_callback";
 
   private int timeoutMillis;
+  private List<OutstandingRequest> outstandingRequests = Lists.newArrayList();
 
-  private static native boolean scriptLoaded() /*-{
+  private static native boolean isScriptLoaded() /*-{
     return !!$wnd.googleapis && !!$wnd.googleapis.newHttpRequest;
   }-*/;
+
+  @VisibleForTesting
+  protected static native void addLoadCallback(CrossDomainRequestBuilder builder) /*-{
+    $wnd.__apis_explorer_load_callback = function() {
+      builder.
+        @com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequestBuilder::scriptFinishedLoading()();
+    };
+  }-*/;
+
+  public void scriptFinishedLoading() {
+    setBaseUrl();
+
+    for (OutstandingRequest request : outstandingRequests) {
+      doMakeRequest(request.request, request.xdr);
+    }
+  }
 
   public void setTimeoutMillis(int timeoutMillis) {
     this.timeoutMillis = timeoutMillis;
@@ -54,20 +74,26 @@ public class CrossDomainRequestBuilder {
     final CrossDomainRequest xdr = new CrossDomainRequest(callback, timeoutMillis);
 
     /** Adds a script tag to the page to load the JS library used to make requests. */
-    if (!scriptLoaded()) {
-      ScriptElement script = Document.get().createScriptElement();
-      script.setSrc(JS_CLIENT_URL);
-      Document.get().getElementsByTagName("head").getItem(0).appendChild(script);
+    if (!isScriptLoaded()) {
+      outstandingRequests.add(new OutstandingRequest(request, xdr));
 
-      new Timer() {
-        @Override
-        public void run() {
-          if (scriptLoaded()) {
-            doMakeRequest(request, xdr);
-            cancel();
-          }
-        }
-      }.scheduleRepeating(100);
+      // If we are the only request waiting, it is our responsibility to load the library.
+      if (outstandingRequests.size() == 1) {
+        addLoadCallback(this);
+        ScriptInjector.fromUrl(JS_CLIENT_URL)
+            .setWindow(ScriptInjector.TOP_WINDOW)
+            .setCallback(new Callback<Void, Exception>() {
+              @Override
+              public void onFailure(Exception e) {
+                throw new RuntimeException(e);
+              }
+
+              @Override
+              public void onSuccess(Void arg0) {
+                // Intentionally blank, callback will be invoked automatically
+              }
+            }).inject();
+      }
     } else {
       doMakeRequest(request, xdr);
     }
@@ -79,4 +105,19 @@ public class CrossDomainRequestBuilder {
     xdr.sendRequest(jso);
   }
 
+  private static native void setBaseUrl() /*-{
+    var proxy = @com.google.api.explorer.client.base.Config::baseUrl + '/static/proxy.html';
+    $wnd.gapi.config.update('googleapis.config/proxy', proxy);
+  }-*/;
+
+  private static class OutstandingRequest {
+
+    public final ApiRequest request;
+    public final CrossDomainRequest xdr;
+
+    public OutstandingRequest(ApiRequest request, CrossDomainRequest xdr) {
+      this.request = request;
+      this.xdr = xdr;
+    }
+  }
 }

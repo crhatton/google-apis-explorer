@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style>
+    .actionImage {
+      vertical-align: middle;
+    }
+
+    .panel {
+      padding-left: 15px;
+    }
+
+    .addItemPlaceholder {
+      padding-left: 15px;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    [
+    <g:HTMLPanel ui:field="panel" styleName="{style.panel}" />
+    <g:FlowPanel styleName="{res.style.requestEditorControl} {style.addItemPlaceholder}">
+      <g:Image ui:field="newItem" resource="{res.addGreen}" styleName="{res.style.clickable} {style.actionImage}" />  
+    </g:FlowPanel>
+    <div>]</div>
+    <g:PopupPanel ui:field="addTooltip" autoHideEnabled="true">
+      <g:FlowPanel styleName="{res.style.tooltip}">
+        <g:Label>Add an array element to the end of the array editor.</g:Label>
+      </g:FlowPanel>
+    </g:PopupPanel>
+  </g:HTMLPanel>
+</ui:UiBinder>

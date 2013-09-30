@@ -18,6 +18,11 @@ package com.google.api.explorer;
 
 import com.google.api.explorer.client.base.dynamicjso.DynamicJsArrayGwtTest;
 import com.google.api.explorer.client.base.dynamicjso.DynamicJsoGwtTest;
+import com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequestBuilderGwtTest;
+import com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequestGwtTest;
+import com.google.api.explorer.client.base.rpc.gwt.RpcApiRequestGwtTest;
+import com.google.api.explorer.client.embedded.RequestBodyFormGwtTest;
+import com.google.api.explorer.client.parameter.schema.ObjectSchemaEditorGwtTest;
 import com.google.gwt.junit.tools.GWTTestSuite;
 
 import junit.framework.TestSuite;
@@ -33,6 +38,11 @@ public class GwtTests extends GWTTestSuite {
     TestSuite suite = new TestSuite("GWT tests for GoogleApi module");
     suite.addTestSuite(DynamicJsoGwtTest.class);
     suite.addTestSuite(DynamicJsArrayGwtTest.class);
+    suite.addTestSuite(RpcApiRequestGwtTest.class);
+    suite.addTestSuite(CrossDomainRequestGwtTest.class);
+    suite.addTestSuite(CrossDomainRequestBuilderGwtTest.class);
+    suite.addTestSuite(ObjectSchemaEditorGwtTest.class);
+    suite.addTestSuite(RequestBodyFormGwtTest.class);
     return suite;
   }
 }

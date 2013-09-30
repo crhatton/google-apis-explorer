@@ -1,25 +1,218 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-  <ui:style>
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style type="com.google.api.explorer.client.auth.AuthView.AuthViewStyle">
     .clickable {
       color: #4272DB;
       text-decoration: underline;
       cursor: pointer;
     }
 
-    .auth > span {
+    .scopePopup {
+      border: 1px solid #C4C4C4;
+      background: white;
+      -webkit-box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      padding: 20px;
+      color: #777;
+    }
+    
+    .scopePopupGlass {
+      background: #666;
+      opacity: 0.5;
+    }
+    
+    .scopeListText {
+      margin-top: 10px;
+      color: #222;
+    }
+    
+    .scopeSectionText {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .scopePanel input[type="checkbox"] {
+      position: absolute;
+    }
+    
+    .scopePanel label,
+    .scopePanel span {
+      margin-left: 26px;
+      color: #222;
+    }
+    
+    .scopePanel > span span {
+      color: #777;
+      font-style: italic;
+    }
+
+    .additionalScopes input[type="text"] {
+      border: 1px solid #ccc;
+      height: 1.2em;
+      width: 400px;
+      margin: 10px;
+    }
+
+    .additionalScopes {
+      max-height: 200px;
+      overflow: auto;    
+    }
+
+    .authToggle {
+      margin-left: 5px;
+      display: inline;
       vertical-align: middle;
+    }
+    
+    .authToggleContents {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .actionButton {
+      margin: 5px;
+      border-radius: 2px;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: default;
+      height: 29px;
+      border: 1px solid #3079ed;
+      color: #FFF;
+      background-color: #4d90fe;
+      background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
+      background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: -ms-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: linear-gradient(top,#4d90fe,#4787ed);
+      filter: literal("progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#4787ed')");
+    }
+    
+    actionButton:hover {
+      background-color: #357ae8;
+      background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#357ae8));
+      background-image: -webkit-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: -moz-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: -ms-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: -o-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: linear-gradient(top,#4d90fe,#357ae8);
+      filter: filter("progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#357ae8')");
+    }
+
+    .dismissButton {
+      margin: 5px;
+      text-align: center;
+      background-color: #F5F5F5;
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #444444;
+      border-radius: 2px;
+      font-weight: bold;
+      font-size: 11px;
+      height: 29px;
+      cursor: default;
+    }
+    
+    dismissButton:hover {
+      border-color: #c6c6c6;
+    }
+
+    .popupTitle {
+      padding: 5px 0;      
+      font-weight: normal;
+      color: #DD4B39;
+      font-size: 20px;
+      border: 0px;
+      background-color: white;
+      text-align: left;
+    }
+
+    .scopePopupContents {
+      width: 450px; 
+    }
+
+    .discoveryScopeSelector {
+      display: block;
+      margin: 10px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 15px;
+      height: 15px;
+      background: transparent;
+      overflow: visible;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical,
+    ::-webkit-scrollbar-thumb:horizontal {
+      height: 1px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-right: 4px solid #FFF;
+      border-left: 4px solid #FFF;
+      border-top: 6px solid #FFF;
+      border-bottom: 6px solid #FFF;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical:hover,
+    ::-webkit-scrollbar-thumb:horizontal:hover
+      {
+      background-color: rgba(0, 0, 0, 0.4);
     }
   </ui:style>
   <g:HTMLPanel>
-    <g:InlineLabel ui:field="authState">Using Public Access.</g:InlineLabel>
-    <g:InlineLabel ui:field="authLink" styleName="{style.clickable}">Switch to Private
-      Access</g:InlineLabel>
-    <span ui:field="scopeSelector">
-      with scope:
-      <g:ListBox ui:field="scopeSelectorListBox" />
-    </span>
-    <g:InlineLabel ui:field="revokeAccess" styleName="{style.clickable}">Switch to
-      Public Access</g:InlineLabel>
+    <g:FlowPanel ui:field="scopeSelector">
+      <g:InlineLabel styleName="{style.authToggleContents}">Authorize requests using OAuth 2.0:</g:InlineLabel>
+      <g:FlowPanel styleName="{style.authToggleContents}">
+        <g:ToggleButton ui:field="authToggle" styleName="{style.authToggle}">
+            <g:upFace image="{res.toggleOff}" />
+            <g:downFace image="{res.toggleOn}" />
+        </g:ToggleButton>
+      </g:FlowPanel>
+      <g:FocusPanel ui:field="discloseScopeInfo" styleName="{style.authToggleContents}" >
+        <g:FlowPanel>
+          <g:Image ui:field="authInfoIcon" resource="{res.info}" visible="false"/>
+          <g:Image ui:field="authErrorIcon" resource="{res.errorRed}" visible="false"/>
+          <g:Image ui:field="authWarningIcon" resource="{res.error}" visible="false"/>
+        </g:FlowPanel>
+      </g:FocusPanel>
+    </g:FlowPanel>
+    <g:PopupPanel modal="true" ui:field="scopePopup" glassEnabled="true" glassStyleName="{style.scopePopupGlass}">
+      <g:FlowPanel styleName="{style.scopePopup}">
+        <g:Label styleName="{style.popupTitle}">Select OAuth 2.0 scopes:</g:Label>
+        <g:FlowPanel styleName="{style.scopePopupContents}">
+          <g:FlowPanel>
+            <g:InlineLabel>
+              Scopes are used to grant an application different levels of access to data
+              on behalf of the end user. Each API may declare one or more scopes.&nbsp;
+            </g:InlineLabel>
+            <g:Anchor target="_blank" href="http://code.google.com/apis/accounts/docs/OAuth2.html">
+              Learn more about OAuth 2.0
+            </g:Anchor>
+          </g:FlowPanel>
+        
+          <g:FlowPanel styleName="{style.scopeSectionText}">
+            <g:InlineLabel ui:field="serviceName">Service name</g:InlineLabel>
+            <g:InlineLabel ui:field="hasScopesText">
+              &nbsp;declares the following scopes. Select which ones you want to grant to APIs Explorer.
+            </g:InlineLabel>
+            <g:InlineLabel ui:field="noScopesText">
+              &nbsp;does not declare any scopes. You can manually add scopes using the box below.
+            </g:InlineLabel>
+          </g:FlowPanel>
+          <g:FlowPanel ui:field="scopePanel" styleName="{style.scopePanel}"/>
+          <g:Label styleName="{style.scopeSectionText}" ui:field="optionalAdditionalScopes">Add additional scopes (optional):</g:Label>
+          <g:FlowPanel ui:field="additionalScopePanel" styleName="{style.additionalScopes}"/>
+          <g:FlowPanel>
+            <g:Button ui:field="authorizeButton" styleName="{style.actionButton}">Authorize</g:Button>
+            <g:Button ui:field="cancelAuthButton" styleName="{style.dismissButton}">Cancel</g:Button>
+          </g:FlowPanel>
+        </g:FlowPanel>
+      </g:FlowPanel>
+    </g:PopupPanel>
+    <g:PopupPanel ui:field="scopeInfoPopup" autoHideEnabled="true">
+      <g:FlowPanel styleName="{style.scopePopup}">
+        <g:Label ui:field="authMessage" />
+        <g:Label ui:field="scopeList" styleName="{style.scopeListText}" />
+      </g:FlowPanel>
+    </g:PopupPanel>
   </g:HTMLPanel>
 </ui:UiBinder>

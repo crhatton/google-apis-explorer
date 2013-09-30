@@ -1,0 +1,22 @@
+.parameterFormNameCell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.requiredParameter {
+  font-weight: bold;
+  color: #DD4B39;
+}
+
+.parameterFormDescriptionCell {
+  font-size: 13px;
+  color: #666;
+}
+
+.parameterFormEditorCell {
+  width: 200px;
+}
+
+.bodyDisclosure {
+  padding-top: 14px;
+}

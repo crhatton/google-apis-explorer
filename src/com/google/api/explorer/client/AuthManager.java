@@ -17,64 +17,111 @@
 package com.google.api.explorer.client;
 
 import com.google.api.explorer.client.base.ApiService;
-import com.google.api.explorer.client.event.AuthGrantedEvent;
-import com.google.api.explorer.client.event.AuthRequestedEvent;
+import com.google.api.explorer.client.base.Config;
 import com.google.api.gwt.oauth2.client.Auth;
 import com.google.api.gwt.oauth2.client.AuthRequest;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.event.shared.EventBus;
 
 import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.concurrent.Immutable;
 
 /**
- * Manages authentication state by accepting {@link AuthRequestedEvent}s and
- * dispatching {@link AuthGrantedEvent}s when auth is complete.
+ * Manages authentication state by accepting auth requests asynchronously and notifies callers when
+ * auth is ready.
  *
  * @author jasonhall@google.com (Jason Hall)
  */
-public class AuthManager implements AuthRequestedEvent.Handler {
+public class AuthManager {
 
-  private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
-  private static final String CLIENT_ID = "835264079878.apps.googleusercontent.com";
-  private static final Map<ApiService, String> AUTH_TOKENS = Maps.newHashMap();
-  private final EventBus eventBus;
-  private final AppState appState;
+  /**
+   * Class which binds scope information with the granted auth token for more intelligent messaging
+   * when there is insufficient auth.
+   *
+   */
+  @Immutable
+  public class AuthToken {
+    private final String authToken;
+    private final ImmutableSet<String> scopes;
 
-  public AuthManager(EventBus eventBus, AppState appState) {
-    eventBus.addHandler(AuthRequestedEvent.TYPE, this);
-    this.eventBus = eventBus;
-    this.appState = appState;
+    private AuthToken(String authToken, Set<String> scopes) {
+      this.authToken = Preconditions.checkNotNull(authToken);
+      this.scopes = ImmutableSet.copyOf(scopes);
+    }
+
+    /**
+     * Returns the auth token.
+     */
+    public String getAuthToken() {
+      return authToken;
+    }
+
+    /**
+     * Returns the scopes that were used when this token was granted.
+     */
+    public ImmutableSet<String> getScopes() {
+      return scopes;
+    }
   }
 
-  @Override
-  public void onAuthRequested(final AuthRequestedEvent event) {
-    String serviceName = appState.getCurrentService().getName();
-
-    // TODO(jasonhall): Show some indication that auth is in progress here.
-
-    AuthRequest req = new AuthRequest(AUTH_URL, CLIENT_ID).withScopes(event.scope);
-
-    Auth.get().login(req, new Callback<String, Throwable>() {
-      @Override
-      public void onSuccess(String token) {
-        AUTH_TOKENS.put(appState.getCurrentService(), token);
-        eventBus.fireEvent(new AuthGrantedEvent(appState.getCurrentService(), token));
-      }
-
-      @Override
-      public void onFailure(Throwable caught) {
-        throw new RuntimeException(caught);
-      }
-    });
+  /**
+   * Interface which defines the callback definition format that must be implemented to receive
+   * information about when auth has been completed.
+   *
+   */
+  public interface AuthCompleteCallback {
+    /**
+     * Callback method that is invoked when auth has completed successfully.
+     *
+     * @param token Token which was obtained.
+     */
+    public void complete(AuthToken token);
   }
+
+  private static final Map<ApiService, AuthToken> authTokens = Maps.newHashMap();
 
   /**
    * Get the token stored for the current service, or {@code null} if there is
    * no token.
    */
-  public String getToken() {
-    return AUTH_TOKENS.get(appState.getCurrentService());
+  public AuthToken getToken(ApiService service) {
+    return authTokens.get(service);
+  }
+
+  /**
+   * Request auth for the given service and scopes, and notify the callback when complete.
+   *
+   * @param service Service for which auth is being requested.
+   * @param scopes Scopes which the user is requesting access to.
+   * @param callback Receiver which should be notified when there is a failure.
+   * @throws RuntimeException when an exception occurs completing the auth.
+   */
+  public void requestAuth(
+      final ApiService service, final Set<String> scopes, final AuthCompleteCallback callback) {
+
+    // TODO(jasonhall): Show some indication that auth is in progress here.
+    String[] scopeArray = scopes.toArray(new String[] {});
+    AuthRequest req = new AuthRequest(Config.AUTH_URL, Config.CLIENT_ID).withScopes(scopeArray);
+
+    Auth.get().login(req, new Callback<String, Throwable>() {
+      @Override
+      public void onSuccess(String tokenString) {
+        AuthToken token = new AuthToken(tokenString, scopes);
+        authTokens.put(service, token);
+        callback.complete(token);
+      }
+
+      @Override
+      public void onFailure(Throwable caught) {
+        // When this occurs the UI is left unchanged and the user is allowed to retry the auth
+        // request by clicking the toggle again.
+        throw new RuntimeException(caught);
+      }
+    });
   }
 
   /**
@@ -86,10 +133,10 @@ public class AuthManager implements AuthRequestedEvent.Handler {
    * when this is supported.
    * </p>
    */
-  public void revokeAccess() {
+  public void revokeAccess(ApiService service) {
     // TODO(jasonhall): This should actually revoke access on the server, and
     // remove the token from the cookie. It currently does nothing more than
     // "forget" it knows the token.
-    AUTH_TOKENS.remove(appState.getCurrentService());
+    authTokens.remove(service);
   }
 }

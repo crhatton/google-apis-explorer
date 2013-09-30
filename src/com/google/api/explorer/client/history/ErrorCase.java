@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.Label;
  */
 public enum ErrorCase {
   NEEDS_AUTH("Authorization required", "This method requires you to be authenticated. "
-      + "You may need to switch to private access (above)."),
+      + "You may need to activate the toggle above to authorize your request using OAuth 2.0."),
   FORBIDDEN("Forbidden", "You do not have permission to execute this method."),
   REQUIRED("Required", "A required value was not given."),
   REQUIRED_PARAMETER("Required Parameter", "A required parameter was not given."),
@@ -68,7 +68,7 @@ public enum ErrorCase {
     DynamicJso error = JsonUtils.<DynamicJso>safeEval(jsonString).get("error");
     int code = error.getInteger("code");
     String message = error.getString("message");
-    
+
     // All 401 responses should show the "needs auth" error message.
     if (code == 401) {
       return ErrorCase.NEEDS_AUTH;

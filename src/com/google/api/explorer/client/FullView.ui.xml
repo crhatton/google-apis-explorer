@@ -1,158 +1,385 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-  xmlns:auth="urn:import:com.google.api.explorer.client.auth"
   xmlns:service="urn:import:com.google.api.explorer.client.service"
-  xmlns:version="urn:import:com.google.api.explorer.client.version"
-  xmlns:method="urn:import:com.google.api.explorer.client.method"
-  xmlns:parameter="urn:import:com.google.api.explorer.client.parameter"
-  xmlns:history="urn:import:com.google.api.explorer.client.history">
+  xmlns:history="urn:import:com.google.api.explorer.client.history"
+  xmlns:rpc="urn:import:com.google.api.explorer.client.base.rpc"
+  xmlns:content="urn:import:com.google.api.explorer.client.content"
+  xmlns:nav="urn:import:com.google.api.explorer.client.navigation">
   <ui:with field="res" type="com.google.api.explorer.client.Resources" />
-  <ui:style>
+  <ui:style type="com.google.api.explorer.client.FullView.FullViewStyle">
+    .header {
+      boders-style: solid;
+      background-color: #F1F1F1;
+      padding: 3px;
+    }
+
+    .searchBoxPlaceholder {
+      height: 30px;
+      margin-left: 200px;
+      padding-top: 20px;
+    }
+
+    .searchBoxContainer {
+      border-style: solid;
+      border-color: #D9D9D9;
+      border-width: 1px;
+
+      display: inline-block;
+      vertical-align: middle;
+      height: 29px;
+      width: 400px;
+      background-color: white;
+    }
+
+    .loadingIndicator {
+      font-size: 11px;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #F9EDBE;
+      position: absolute;
+      left: 523px;
+      line-height: 27px;
+      padding: 0px 16px;
+
+      border-style: solid;
+      border-color: #F0C36D;
+      border-width: 1px;
+    }
+
+    .searchBox {
+      font-size: 16px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 3px;
+      border-style: none;
+      outline-style: none;
+      background-color: transparent;
+      margin: 3px;
+      width: 100%;
+    }
+    
+    .searchPlaceholderText {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .searchButton {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      border-radius: 2px;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: default;
+      height: 29px;
+      border: 1px solid #3079ed;
+      color: #FFF;
+      width: 70px;
+      margin: 0 15px;
+      background-color: #4d90fe;
+      background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
+      background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: -moz-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: -ms-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
+      background-image: linear-gradient(top,#4d90fe,#4787ed);
+      filter: literal("progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#4787ed')");
+    }
+
+    .searchButton:hover {
+      background-color: #357ae8;
+      background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#357ae8));
+      background-image: -webkit-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: -moz-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: -ms-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: -o-linear-gradient(top,#4d90fe,#357ae8);
+      background-image: linear-gradient(top,#4d90fe,#357ae8);
+      filter: literal("progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#357ae8')");
+    }
+
+    .searchButton img {
+      margin-top: 5px;
+    }
+
+    .toolbarButton {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      background-color: #F5F5F5;
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #444444;
+      border-radius: 2px;
+      font-weight: bold;
+      font-size: 11px;
+      height: 29px;
+      width: 70px;
+      cursor: default;
+    }
+
+    .toolbarButton:hover {
+      border-color: #c6c6c6;
+    }
+
+    .toolbarButton img {
+      margin-top: 5px;
+      opacity: .5;
+    }
+
+    .toolbarButton:hover img {
+      opacity: 1;
+    }
+
+    .logoPlaceholder {
+      position: absolute;
+      margin-left: 10px;
+    }
+
     .logo {
-      margin-top: 8px;
-      padding-bottom: 5px;
       cursor: pointer;
+    }
+
+    .toolBar {
+      border-bottom-style: solid;
+      border-color: #E5E5E5;
+      border-width: 1px;    
+    }
+
+    .productNamePlaceholder {
+      position: absolute;
+      padding: 10px;
+    }
+
+    .productName {
+      color: #DD4B39;
+      font-size: 20px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .buttonBarPlaceholder {
+      height: 30px;
+      margin-left: 200px;
+      padding-top: 6px;
+    }
+
+    .navigationPanel {
+      color: #222222;
+      font-size: 13px;
+      font-family: Arial, Helvetica, sans-serif;          
+    }
+
+    .navigationPanel > div {
+      padding: 10px;
+      cursor: pointer;
+      outline-style: none;
+    }
+
+    .navigationPanel > div:hover {
+      background-color: #F1F1F1;
+    }
+
+    .navigationPanel span {
+      padding-left: 5px;
+      vertical-align: middle;
+    }
+
+    .selectedNavigation {
+      color: #DD4B39;
+      font-weight: bold;
+    }
+
+    .navigationPanel img {
+      vertical-align: middle;
     }
 
     .dockLayoutPanel {
       height: 100%;
       min-height: 300px;
-      margin: 0 10px;
     }
 
-    .header {
-      border-width: 1px 1px 0 1px;
-      border-style: solid;
-      border-color: #C9D7F1;
-      background-color: #EBEFF9;
-      padding: 6px;
-      height: 25px;
+    .contentContainer {
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
-    .headerText {
-      padding-left: 3px;
-      font-weight: bold;
-      font-size: 20px;
-      float: left;
+    .docsContainer {
+      margin: 10px 10px 10px 0px;
+      padding: 5px;
+      background-color: #F1F1F1;
+      font-size: 13px;
+      font-family: Arial, Helvetica, sans-serif;
+      border: 1px solid #E5E5E5;
+    }
+
+    .detailHeader {
+      border-bottom-style: solid;
+      border-color: #D9D9D9;
+      border-width: 1px;
+      padding-top: 15px;
+    }
+
+    .detailTitle {
+      color: #222222;
+      font-size: 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 10px;
+      display: inline-block;
+    }
+    
+    .detailTitle a:link {
+      color: #12C;
+      text-decoration: none;
+    }
+    
+    .detailTitle a:visited {
+      color: #12C;
+      text-decoration: none;
     }
 
     .auth {
       float: right;
+      display: inline-block;
+      padding: 10px 10px 0px 10px;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
     }
 
-    .horizPanel {
-      height: 100%;
-      max-height: 270px;
-      min-height: 270px;
-      width: 100%;
-      border-color: #C9D7F1;
-      border-width: 0 0 0 1px;
-      border-style: solid;
-      border-spacing: 0;
+    .searchError {
+      padding: 30px 0px;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
-    .horizPanel>tbody>tr>td {
-      min-width: 200px;
-      border-color: #C9D7F1;
-      border-width: 1px 1px 0 0;
-      border-style: solid;
-      padding: 0;
-      vertical-align: top;
+    .searchErrorIcon {
+      margin-right: 4px;
     }
 
-    .response {
-      border: 2px 0 solid #C9D7F1;
-    }
-
-    .showHide {
-      width: 100%;
-      cursor: pointer;
-      background-color: #C9D7F1;
-      color: white;
-      text-align: center;
-      font-size: 10px;
-      height: 13px;
-    }
-
-    .historyHeader {
-      background-color: #F3F3F3;
-      text-align: center;
-      border-style: solid;
-      border-width: 0 1px;
-      border-color: #C9D7F1;
-      padding: 7px 0;
-      font-size: 14px;
+    .searchError > *{
+      vertical-align: middle;
     }
 
     .footer {
       padding-top: 5px;
       border-style: solid;
       border-width: 1px 0 0 0;
-      border-color: #C9D7F1;
+      border-color: #E5E5E5;
       text-align: center;
     }
 
     .footer a {
-      color: #4272DB;
+      color: #1155CC;
+      text-decoration: none;
+    }
+
+    @external .settingsMenuPopup, .settingsMenu;
+
+    .settingsMenu {
+      float: right;
+      position: relative;
+      right: 10px;
+    }
+
+    .settingsMenuPopup {
+      right: 10px;
+      left: auto !important;
+    }
+    
+    .methodSubtitle {
+      color: #777;
     }
   </ui:style>
 
   <g:HTMLPanel>
     <g:DockLayoutPanel ui:field="dockLayoutPanel" styleName="{style.dockLayoutPanel}">
-      <g:north size="55">
-        <g:Image ui:field="logo" styleName="{style.logo}" resource="{res.logo}" />
+      <g:north size="71">
+        <g:FlowPanel styleName="{style.header}">
+          <g:FlowPanel styleName="{style.logoPlaceholder}">
+            <g:Image ui:field="logo" styleName="{style.logo}" resource="{res.logo}"/>
+          </g:FlowPanel>
+          <g:FlowPanel styleName="{style.searchBoxPlaceholder}">
+            <g:FlowPanel styleName="{style.searchBoxContainer}">
+              <g:InlineLabel ui:field="searchLoadingIndicator" styleName="{style.loadingIndicator}">
+                Loading...
+              </g:InlineLabel>
+              <g:SuggestBox ui:field="searchBox" styleName="{style.searchBox}"/>
+            </g:FlowPanel>
+            <g:PushButton ui:field="searchButton" styleName="{style.searchButton}">
+              <g:upFace image="{res.searchButton}"/>
+            </g:PushButton>
+          </g:FlowPanel>
+        </g:FlowPanel>
       </g:north>
-      <g:north size="306">
-        <g:HTMLPanel ui:field="selectorPanel">
-          <div class="{style.header}">
-            <span class="{style.headerText}">APIs Explorer</span>
-            <span>
-              <auth:AuthView styleName="{style.auth}" ui:field="authView" />
-            </span>
-          </div>
-          <div>
-            <table class="{style.horizPanel}">
-              <tbody>
-                <tr>
-                  <td width="250" ui:field="serviceColumn">
-                    <service:ServiceSelector visible="false" ui:field="serviceSelector" />
-                  </td>
-                  <td width="200" ui:field="versionColumn">
-                    <version:VersionSelector visible="false" ui:field="versionSelector" />
-                  </td>
-                  <td width="300" ui:field="methodColumn">
-                    <method:MethodSelector visible="false" ui:field="methodSelector" />
-                  </td>
-                  <td width="">
-                    <parameter:ParameterForm visible="false" ui:field="parameterForm" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </g:HTMLPanel>
+      <g:north size="45">
+        <g:FlowPanel styleName="{style.toolBar}">
+          <g:FlowPanel styleName="{style.productNamePlaceholder}">
+            <g:Label styleName="{style.productName}">APIs Explorer</g:Label>
+          </g:FlowPanel>
+          <g:FlowPanel styleName="{style.buttonBarPlaceholder}">
+            <g:PushButton ui:field="backButton" styleName="{style.toolbarButton}">
+              <g:upFace image="{res.backButton}"/>
+            </g:PushButton>
+            <g:MenuBar ui:field="settingsMenu" focusOnHoverEnabled="false">
+              <g:MenuItem>
+                <div class="{res.style.settingsButton}"/>
+                <g:MenuBar vertical="true" focusOnHoverEnabled="false">
+                  <g:MenuItem ui:field="helpItem">Help</g:MenuItem>
+                  <g:MenuItem ui:field="forumItem">Forum</g:MenuItem>
+                  <g:MenuItem ui:field="bugReportItem">Report a bug</g:MenuItem>
+                </g:MenuBar>
+              </g:MenuItem>
+            </g:MenuBar>
+          </g:FlowPanel>
+        </g:FlowPanel>
       </g:north>
-      <g:north size="13">
-        <g:Label ui:field="showHide" styleName="{style.showHide} {res.style.showHide}"
-          title="Click to expand/collapse selector panel" />
-      </g:north>
-      <g:north size="30">
-        <g:Label styleName="{style.historyHeader}">History</g:Label>
-      </g:north>
-
-      <g:south size="25">
-        <g:HTMLPanel ui:field="footer" styleName="{style.footer}">
-          &copy;
-          2011 Google, Inc. |
-          <a href="http://code.google.com/apis/explorer-help" target="_blank">Help</a>
-          |
-          <a href="http://code.google.com/apis/explorer-help/forum.html" target="_blank">Forum</a>
-          |
-          <a href="http://code.google.com/p/google-apis-explorer/issues/entry?template=Defect%20report%20from%20user"
-            target="_blank">Report a bug</a>
-        </g:HTMLPanel>
-      </g:south>
+      <g:west size="200">
+        <g:FlowPanel>
+          <g:FlowPanel styleName="{style.navigationPanel}">
+            <g:FocusPanel ui:field="preferredServicesMenuItem">
+              <g:FlowPanel>
+                <g:Image resource="{res.services}" />
+                <g:InlineLabel>Services</g:InlineLabel>
+              </g:FlowPanel>
+            </g:FocusPanel>
+            <!-- TODO(moshenko) Add this back in when we support recent services 
+            <g:FocusPanel ui:field="recentServicesMenuItem">
+              <g:FlowPanel>
+                <g:Image resource="{res.recentServices}" />
+                <g:InlineLabel>Recently Updated</g:InlineLabel>
+              </g:FlowPanel>
+            </g:FocusPanel>
+             -->
+            <g:FocusPanel ui:field="allServicesMenuItem">
+              <g:FlowPanel>
+                <g:Image resource="{res.allServices}" />
+                <g:InlineLabel>All Versions</g:InlineLabel>
+              </g:FlowPanel>
+            </g:FocusPanel>
+            <g:FocusPanel ui:field="requestHistoryMenuItem">
+              <g:FlowPanel>
+                <g:Image resource="{res.requestHistory}" />
+                <g:InlineLabel>Request History</g:InlineLabel>
+              </g:FlowPanel>
+            </g:FocusPanel>
+          </g:FlowPanel>
+        </g:FlowPanel>
+      </g:west>
+      <g:center>
+        <g:FlowPanel styleName="{style.contentContainer}">
+          <g:FlowPanel ui:field="docsContainer" visible="false" styleName="{style.docsContainer}">
+            <g:InlineLabel>Learn more about using this by reading the&nbsp;</g:InlineLabel> 
+            <g:Anchor target="_blank" href="https://developers.google.com/">documentation</g:Anchor>
+          </g:FlowPanel>
+          <g:FlowPanel ui:field="detailHeader" styleName="{style.detailHeader}" visible="false">
+            <g:FlowPanel ui:field="detailTitleContainer" styleName="{style.detailTitle}"/>
+            <g:FlowPanel styleName="{style.auth} auth" visible="false" ui:field="authViewPlaceholder" />
+          </g:FlowPanel>
+          <g:FlowPanel ui:field="searchErrorPanel" styleName="{style.searchError}" visible="false">
+            <g:Image resource="{res.error}" styleName="{style.searchErrorIcon}"/>
+            <g:InlineLabel>No services, methods, or history matched your search term.</g:InlineLabel>
+          </g:FlowPanel>
+          <nav:SectionedAggregator ui:field="searchResults" visible="false"/>
+          <nav:EntryAggregatorView ui:field="drillDownNav" visible="false"/>
+          <g:FlowPanel ui:field="detailPane" visible="false">
+          </g:FlowPanel>
+        </g:FlowPanel>
+      </g:center>
     </g:DockLayoutPanel>
   </g:HTMLPanel>
 </ui:UiBinder>

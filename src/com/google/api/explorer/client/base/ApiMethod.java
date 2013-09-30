@@ -25,26 +25,19 @@ import java.util.Map;
  * @author jasonhall@google.com (Jason Hall)
  */
 public interface ApiMethod {
-
   /** HTTP method used to call this method. */
   public enum HttpMethod {
     GET, POST, DELETE, PUT, PATCH, HEAD;
   }
 
-  /** Path URL template of this method. */
-  String getPath();
-
-  /** HTTP Method that will be used when this method is executed using REST. */
-  HttpMethod getHttpMethod();
-
   /** A short description of what this method does. */
   String getDescription();
 
   /**
-   * Returns a {@link Map} of all {@link ApiParameter}s of this method, keyed by
+   * Returns a {@link Map} of all {@link Schema}s of this method, keyed by
    * parameter name.
    */
-  Map<String, ApiParameter> getParameters();
+  Map<String, Schema> getParameters();
 
   /**
    * {@link List} of parameter keys (corresponding to the keys in
@@ -57,8 +50,37 @@ public interface ApiMethod {
   List<String> getParameterOrder();
 
   /**
-   * {@link List} of auth scope keys (corresponding to keys in {@link
-   * ApiService.AuthInformation#getScopes()}) that can be used by this method.
+   * {@link List} of auth scope keys (corresponding to keys in
+   * {@link ApiService.AuthInformation#getScopes()}) that can be used by this
+   * method.
    */
   List<String> getScopes();
+
+  /** Path URL template of this method. */
+  String getPath();
+
+  /** HTTP Method that will be used when this method is executed. */
+  HttpMethod getHttpMethod();
+
+  /**
+   * Returns a map containing one key, "$ref", which maps to the schema ID of
+   * its request information, or {@code null} if no request body is required.
+   */
+  Map<String, String> getRequest();
+
+  /**
+   * Returns a map containing one key, "$ref", which maps to the schema ID of
+   * its response information, or {@code null} if no response is returned.
+   */
+  Map<String, String> getResponse();
+
+  /**
+   * Returns a schema for the response object, JSON-RPC only.
+   */
+  Map<String, String> getReturns();
+
+  /**
+   * Returns the unique name of this method.
+   */
+  String getId();
 }

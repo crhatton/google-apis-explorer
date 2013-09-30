@@ -1,24 +1,39 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:auth="urn:import:com.google.api.explorer.client.auth"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:embedded="urn:import:com.google.api.explorer.client.embedded">
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:embedded="urn:import:com.google.api.explorer.client.embedded">
   <ui:style>
-    .auth {
-      text-align: right;
-      width: 100%;
+    .all {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
     }
 
     .history {
       width: 100%;
       overflow-y: auto;
     }
+    
+    .authContainer {
+      background-color: #F1F1F1;
+      height: 43px;
+    }
+    
+    .auth {
+      float: right;
+      display: inline-block;
+      padding: 10px 10px 0px 10px;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+    }
   </ui:style>
-  <g:HTMLPanel>
+  <g:HTMLPanel styleName="{style.all}">
+    <g:FlowPanel styleName="{style.authContainer}" ui:field="authViewContainer">
+      <g:FlowPanel styleName="{style.auth} auth" ui:field="authViewPlaceholder" />
+    </g:FlowPanel>
     <div>
-      <auth:AuthView styleName="{style.auth} auth" ui:field="authView" />
       <embedded:EmbeddedParameterForm ui:field="parameterForm" />
     </div>
-    <embedded:EmbeddedHistoryPanel styleName="{style.history} history-panel" ui:field="historyPanel" />
+    <embedded:EmbeddedHistoryPanel styleName="{style.history} history-panel"
+      ui:field="historyPanel" />
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -17,6 +17,8 @@
 package com.google.api.explorer.client.editors;
 
 import com.google.api.explorer.client.Resources;
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
+import com.google.api.explorer.client.editors.Validator.ValidationResult.Type;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +26,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 
 import java.util.List;
 
@@ -41,8 +44,13 @@ class RepeatedEditor extends Editor {
   }
 
   @Override
-  boolean isValid() {
-    return super.isValid() && innerEditor.isValid();
+  ValidationResult isValid() {
+    ValidationResult innerValid = innerEditor.isValid();
+    if (innerValid.getType() != ValidationResult.Type.VALID) {
+      return innerValid;
+    } else {
+      return super.isValid();
+    }
   }
 
   @Override
@@ -62,9 +70,17 @@ class RepeatedEditor extends Editor {
   class RepeatedEditorViewImpl extends FlowPanel implements EditorView {
 
     private final List<EditorView> views = Lists.newArrayList();
+    private final Label errorMessage = new Label();
     private final InlineLabel addMore = new InlineLabel("add more");
 
     RepeatedEditorViewImpl() {
+      // Add the error message, editors will appear above
+      errorMessage.setVisible(false);
+      add(errorMessage);
+
+      // The first editor is added immediately.
+      addEditor();
+
       // The first editor displays an "add more" link that, when clicked, adds
       // another editor to the view.
       addMore.addClickHandler(new ClickHandler() {
@@ -74,17 +90,17 @@ class RepeatedEditor extends Editor {
         }
       });
       addMore.addStyleName(Resources.INSTANCE.style().addParameter());
-      add(addMore);
-
-      // The first editor is added immediately.
-      addEditor();
     }
 
     private EditorView addEditor() {
       // Get the correct inner editor view to display, and add it.
       final EditorView view = innerEditor.createAndSetView();
+
+      // We want the editor to use our view as the source of values.
+      innerEditor.setView(this);
       views.add(view);
-      add(view);
+
+      insert(view, getWidgetIndex(errorMessage));
 
       // If this is not the first editor view, add a clickable image that, when
       // clicked, will remove this editor from the view, as well as the image
@@ -100,7 +116,9 @@ class RepeatedEditor extends Editor {
         });
         remove.setAltText("Remove this value");
         remove.addStyleName(Resources.INSTANCE.style().removeParameter());
-        add(remove);
+        insert(remove, getWidgetIndex(errorMessage));
+      } else {
+        insert(addMore, getWidgetIndex(errorMessage));
       }
 
       return view;
@@ -131,6 +149,7 @@ class RepeatedEditor extends Editor {
         remove(views.get(i));
       }
       views.clear();
+      remove(addMore);
       for (String value : values) {
         EditorView view = addEditor();
         view.setValue(ImmutableList.of(value));
@@ -145,11 +164,21 @@ class RepeatedEditor extends Editor {
     }
 
     @Override
-    public void displayValidation(boolean valid) {
-      if (valid) {
-        removeStyleName(Resources.INSTANCE.style().invalidParameter());
-      } else {
-        addStyleName(Resources.INSTANCE.style().invalidParameter());
+    public void displayValidation(ValidationResult valid) {
+      errorMessage.setVisible(valid.getType() != Type.VALID);
+      removeStyleName(Resources.INSTANCE.style().infoParameter());
+      removeStyleName(Resources.INSTANCE.style().invalidParameter());
+
+      switch(valid.getType()) {
+        case INFO:
+          addStyleName(Resources.INSTANCE.style().infoParameter());
+          errorMessage.setText(valid.getMessage());
+          break;
+
+        case ERROR:
+          addStyleName(Resources.INSTANCE.style().invalidParameter());
+          errorMessage.setText(valid.getMessage());
+          break;
       }
     }
   }

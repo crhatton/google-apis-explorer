@@ -1,0 +1,105 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:sch="urn:import:com.google.api.explorer.client.parameter.schema"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:widgets="urn:import:com.google.api.explorer.client.widgets">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style type="com.google.api.explorer.client.embedded.RequestBodyForm.RequestBodyFormStyle"
+    import="com.google.api.explorer.client.Resources.Css">
+    
+    .requestBody {
+      border: none;
+      width: 100%;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      resize: none;
+      overflow: hidden;
+    }
+    
+    .requestBody:focus {
+      outline-style: none;
+    }
+
+    .errorMessage {
+      display: inline-block;
+      color: #DD4B39;
+      width: 424px;
+    }
+
+    .requestPanel {
+      border: 1px solid #D9D9D9;
+      position: relative;
+    }
+
+    .requestPanel .Css-requestEditorControl,
+    .requestPanel .Css-clickable,
+    .requestPanel .switchEditorButton {
+      -webkit-transition: all 0.25s;
+      -moz-transition: all 0.25s;
+      -transition: all 0.25s;
+    }
+    
+    .hiddenControls .Css-requestEditorControl, 
+    .hiddenControls .Css-clickable,
+    .hiddenControls .switchEditorButton {
+      opacity: 0;
+      visibility: hidden;
+    }
+   
+    .hiddenControls .Css-requestEditorControl, 
+    .hiddenControls .Css-clickable,
+    .hiddenControls .switchEditorButton {
+      height: 0px;
+    }
+    
+    .switchEditorButton {
+      position: absolute;
+      right: 0;
+      display: inline-block;
+      vertical-align: middle;
+      background-color: #F5F5F5;
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #444444;
+      border-radius: 2px;
+      font-size: 11px;
+      height: 31px;
+      padding: 0px 5px;
+    }
+    
+    .switchEditorButton:hover {
+      border-color: #c6c6c6;
+    }
+    
+    .switchEditorButton:hover img {
+      opacity: 1;
+    }
+    
+    .switchEditorButton img {
+      margin-top: 9px;
+      opacity: .5;
+    }
+  </ui:style>
+  <g:FlowPanel>
+    <widgets:DescendantFocusPanel ui:field="requestPanel" styleName="{style.requestPanel} {style.hiddenControls}">
+      <g:FlowPanel>
+        <g:PushButton ui:field="switchEditorMenu" styleName="{style.switchEditorButton}">
+          <g:upFace image="{res.downArrow}"/>
+        </g:PushButton>
+        <g:PopupPanel ui:field="menuPopup" visible="false" autoHideEnabled="true" styleName="{res.style.dropDownMenuPopup}">
+          <g:FlowPanel>
+            <g:PushButton ui:field="showStructured" styleName="{res.style.dropDownMenuItem} {res.style.selectableDropDownMenuItem}">
+              Structured editor
+            </g:PushButton>
+            <g:PushButton ui:field="showFreeform" styleName="{res.style.dropDownMenuItem} {res.style.selectableDropDownMenuItem}">
+              Freeform editor
+            </g:PushButton>
+          </g:FlowPanel>
+        </g:PopupPanel>
+        <g:Label ui:field="editorSwitchError" styleName="{style.errorMessage}" visible="false"/>
+        <sch:SchemaForm ui:field="schemaForm" />
+        <g:TextArea ui:field="requestBody" styleName="{style.requestBody}" />
+      </g:FlowPanel>
+    </widgets:DescendantFocusPanel>
+  </g:FlowPanel>
+
+</ui:UiBinder>

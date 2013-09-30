@@ -1,0 +1,138 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field='res' type='com.google.api.explorer.client.Resources' />
+  <ui:style type="com.google.api.explorer.client.history.EmbeddedHistoryItemView.EmbeddedHistoryItemViewStyle">
+    .item h3 {
+      margin-left: 10px;
+      font-weight: normal;
+      color: #DD4B39;
+      font-size: 20px;
+      height: 43px;
+    }
+
+    .titleBar {
+      background-color: #EBEBEB;
+      width: auto;
+      height: 29px;
+      padding-top: 13px;
+      border-bottom: 1px solid #A9A9A9;
+      padding-left: 8px;
+      outline: none;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .time {
+      padding: 3px 0 0 6px;
+      font-size: 10px;
+    }
+
+    .wireTraffic {
+      font-size: 13px;
+      font-family: "Courier New", Courier, monospace;
+      background-color: #FAFAFA;
+      border: 1px solid #ebebeb;
+      padding: 0 11px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .wireTraffic pre {
+      margin: 0px;
+      margin-left: 15px;
+    }
+
+    .body {
+      width: 100%;
+    }
+
+    .showHideHeaders {
+      color: #500050;
+      cursor: pointer;
+      font-size: 9px;
+      padding-left: 20px;
+      font-family: arial, sans-serif;
+    }
+    
+    .errorContainer {
+      text-align: center;
+      width: 100%;
+      margin-top: -15px;
+    }
+
+    .error {
+      background-color: #DD4B39;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      border-radius: 2px;
+      font-size: 11px;
+      line-height: 29px;
+      padding: 0px 10px;
+      display: inline-block;
+    }
+    
+    .executing {
+      color: #666;
+      display: inline;
+    }
+    
+    .wireContent {
+      -webkit-transition: all 0.5s;
+      -moz-transition: all 0.5s;
+      -transition: all 0.5s;
+      
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .wirePre {
+      white-space: pre-wrap;
+    }
+    
+    .fadeIn {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .loadingThrobber {
+      vertical-align: middle;    
+    }
+</ui:style>
+  <g:HTMLPanel styleName="{style.item}">
+    <g:FlowPanel ui:field="titleBar" styleName="{style.titleBar} history-header">
+      <g:HTMLPanel>
+        <span ui:field="title" class="{style.title}" />
+        <span ui:field="time" class="{style.time}" />
+        <g:FlowPanel styleName="{style.executing}" ui:field="executing">
+          <g:Image resource="{res.miniLoading}" styleName="{style.loadingThrobber}"/>
+          <g:InlineLabel>Executing...</g:InlineLabel>
+        </g:FlowPanel>
+      </g:HTMLPanel>
+    </g:FlowPanel>
+    
+    <g:SimplePanel styleName="{style.errorContainer}">
+      <g:SimplePanel ui:field="errorPanel" styleName="{style.error}" visible="false" />
+    </g:SimplePanel>
+    
+    <g:HTMLPanel ui:field="wireContent" styleName="{style.wireContent}">
+      <h3>Request</h3>
+      <div class="{style.wireTraffic}">
+        <pre ui:field="requestDiv" class="{style.wirePre}"/>
+        <pre class="{style.wirePre}"><g:FlowPanel ui:field="requestBodyDiv"/></pre>
+      </div>
+  
+      <h3>Response</h3>
+      <div class="{style.wireTraffic}">
+        <pre ui:field="statusDiv"/>
+        <g:Label ui:field="showHideHeaders" styleName="{style.showHideHeaders}">
+          - Show headers -
+        </g:Label>
+        <pre ui:field="responseHeadersDiv"/>
+        <pre class="{style.wirePre}"><g:FlowPanel ui:field="responseBodyDiv" /></pre>
+      </div>
+    </g:HTMLPanel>
+  </g:HTMLPanel>
+</ui:UiBinder>

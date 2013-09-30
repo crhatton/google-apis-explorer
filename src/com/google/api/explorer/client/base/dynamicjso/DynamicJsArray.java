@@ -17,7 +17,6 @@
 package com.google.api.explorer.client.base.dynamicjso;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArrayMixed;
 
 /**
  * A generic mutable JavaScript Overlay Type that exposes methods to get values

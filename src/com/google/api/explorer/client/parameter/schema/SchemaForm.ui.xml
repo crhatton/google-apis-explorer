@@ -1,0 +1,47 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    .schemaForm {
+      /*
+       * These dimensions, combined with the padding, mean that the popup will
+       * not change sizes when switching tabs.
+       */
+      padding: 5px;
+    }
+
+    .schemaForm {
+      font-family: monospace;
+    }
+
+    .schemaForm textarea,
+    .schemaForm input[type="text"] {
+      border: 0 !important;
+      border-bottom: 1px solid #ccc !important;
+      display: inline;
+      vertical-align: top;
+      height: 1.2em;
+      width: 15em;
+    }
+
+    .schemaForm textarea:focus,
+    .schemaForm input[type="text"]:focus {
+      outline: none;
+    }
+
+    .schemaForm input[type="checkbox"] {
+      vertical-align: middle;
+    }
+
+    .schemaForm textarea {
+      color: #080;
+    }
+
+    .schemaForm input {
+      color: #008;
+    }
+  </ui:style>
+  <g:HTMLPanel styleName="{style.schemaForm}">
+    <g:HTMLPanel ui:field="root" />
+  </g:HTMLPanel>
+</ui:UiBinder>

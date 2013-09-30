@@ -84,7 +84,7 @@ public final class CrossDomainRequest {
 
   static JavaScriptObject convertRequest(ApiRequest request) {
     DynamicJso headers = DynamicJso.createObject().cast();
-    for (Map.Entry<String, String> entry : request.headers.entrySet()) {
+    for (Map.Entry<String, String> entry : request.getHeaders().entrySet()) {
       headers.set(entry.getKey(), entry.getValue());
     }
 
@@ -93,8 +93,8 @@ public final class CrossDomainRequest {
         .<DynamicJso>cast()
         .set("url", request.getRequestPath())
         .set("headers", headers)
-        .set("body", request.body)
-        .set("httpMethod", request.httpMethod.name());
+        .set("body", request.getRequestBody())
+        .set("httpMethod", request.getHttpMethod().name());
   }
 
   void handleResponse(DynamicJso response) {

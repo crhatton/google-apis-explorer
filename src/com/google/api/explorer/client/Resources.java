@@ -19,6 +19,7 @@ package com.google.api.explorer.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.Shared;
 import com.google.gwt.resources.client.ImageResource;
 
 /**
@@ -33,17 +34,41 @@ public interface Resources extends ClientBundle {
   @Source(PATH + "logo.png")
   ImageResource logo();
 
+  @Source(PATH + "addGreen.png")
+  ImageResource addGreen();
+
   @Source(PATH + "plus-box.gif")
   ImageResource expand();
 
   @Source(PATH + "minus-box.gif")
   ImageResource collapse();
 
+  @Source(PATH + "expand-json.png")
+  ImageResource expandJson();
+
+  @Source(PATH + "collapse-json.png")
+  ImageResource collapseJson();
+
+  @Source(PATH + "checkmark.png")
+  ImageResource checkmark();
+
+  @Source(PATH + "deleteRed.png")
+  ImageResource deleteRed();
+
+  @Source(PATH + "downArrow.png")
+  ImageResource downArrow();
+
   @Source(PATH + "loading.gif")
   ImageResource loading();
 
-  @Source(PATH + "error.gif")
+  @Source(PATH + "info.png")
+  ImageResource info();
+
+  @Source(PATH + "error.png")
   ImageResource error();
+
+  @Source(PATH + "errorRed.png")
+  ImageResource errorRed();
 
   @Source(PATH + "showHide.png")
   ImageResource showHide();
@@ -57,16 +82,58 @@ public interface Resources extends ClientBundle {
   @Source(PATH + "magnifyingGlass.png")
   ImageResource magnifyingGlass();
 
+  @Source(PATH + "lock.png")
+  ImageResource lock();
+
+  @Source(PATH + "toggleOn.png")
+  ImageResource toggleOn();
+
+  @Source(PATH + "toggleOff.png")
+  ImageResource toggleOff();
+
+  @Source(PATH + "question.png")
+  ImageResource question();
+
+  @Source(PATH + "services.png")
+  ImageResource services();
+
+  @Source(PATH + "recentServices.png")
+  ImageResource recentServices();
+
+  @Source(PATH + "requestHistory.png")
+  ImageResource requestHistory();
+
+  @Source(PATH + "allServices.png")
+  ImageResource allServices();
+
+  @Source(PATH + "backButton.png")
+  ImageResource backButton();
+
+  @Source(PATH + "settingsButton.png")
+  ImageResource settingsButton();
+
+  @Source(PATH + "searchButton.png")
+  ImageResource searchButton();
+
   @Source(PATH + "explorer.css")
   Css style();
 
   /**
    * {@link CssResource} for explorer.css
    */
+  @Shared
   public interface Css extends CssResource {
     String expanded();
 
+    String clickable();
+
     String collapsed();
+
+    String defaultTag();
+
+    String limitedTag();
+
+    String checked();
 
     String selected();
 
@@ -88,6 +155,8 @@ public interface Resources extends ClientBundle {
 
     String invalidParameter();
 
+    String infoParameter();
+
     String jsonNull();
 
     String jsonNumber();
@@ -106,6 +175,32 @@ public interface Resources extends ClientBundle {
 
     String jsonArray();
 
+    String jsonExpanded();
+
+    String jsonCollapsed();
+
     String responseLine();
+
+    String reusableResource();
+
+    String reusableResourceButton();
+
+    String settingsButton();
+
+    String requestEditorControl();
+
+    String tag();
+
+    String nullifyButton();
+
+    String nullTextClickable();
+
+    String dropDownMenuPopup();
+
+    String dropDownMenuItem();
+
+    String selectableDropDownMenuItem();
+
+    String tooltip();
   }
 }

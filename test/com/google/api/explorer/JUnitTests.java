@@ -16,18 +16,26 @@
 
 package com.google.api.explorer;
 
-import com.google.api.explorer.client.ApiDirectoryTest;
-import com.google.api.explorer.client.AppStateTest;
-import com.google.api.explorer.client.HistoryManagerTest;
-import com.google.api.explorer.client.ServiceLoaderTest;
 import com.google.api.explorer.client.auth.AuthPresenterTest;
+import com.google.api.explorer.client.base.ApiDirectoryTest;
 import com.google.api.explorer.client.base.ApiRequestTest;
-import com.google.api.explorer.client.base.ApiServiceTest;
+import com.google.api.explorer.client.base.ApiServiceHelperTest;
+import com.google.api.explorer.client.base.SchemaTest;
+import com.google.api.explorer.client.base.ServiceLoaderTest;
+import com.google.api.explorer.client.base.rest.RestApiRequestTest;
+import com.google.api.explorer.client.base.rest.RestApiServiceTest;
+import com.google.api.explorer.client.base.rpc.RpcApiServiceTest;
 import com.google.api.explorer.client.editors.EditorFactoryTest;
-import com.google.api.explorer.client.method.MethodSelectorPresenterTest;
-import com.google.api.explorer.client.parameter.ParameterFormPresenterTest;
-import com.google.api.explorer.client.service.ServiceSelectorPresenterTest;
-import com.google.api.explorer.client.version.VersionSelectorPresenterTest;
+import com.google.api.explorer.client.embedded.EmbeddedParameterFormPresenterTest;
+import com.google.api.explorer.client.history.JsonPrettifierTest;
+import com.google.api.explorer.client.routing.RegexMatchRouterTest;
+import com.google.api.explorer.client.routing.URLBuilderTest;
+import com.google.api.explorer.client.routing.URLFragmentTest;
+import com.google.api.explorer.client.routing.handler.HistoryManagerTest;
+import com.google.api.explorer.client.search.DiscoveryFullTextIndexingStrategyTest;
+import com.google.api.explorer.client.search.KeywordExtractorTest;
+import com.google.api.explorer.client.search.SearchEntryTest;
+import com.google.api.explorer.client.search.SearchResultIndexTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -41,16 +49,24 @@ public class JUnitTests extends TestSuite {
     TestSuite suite = new TestSuite("JUnit tests for API Explorer.");
     suite.addTestSuite(ApiDirectoryTest.class);
     suite.addTestSuite(ApiRequestTest.class);
-    suite.addTestSuite(ApiServiceTest.class);
-    suite.addTestSuite(AppStateTest.class);
+    suite.addTestSuite(DiscoveryFullTextIndexingStrategyTest.class);
+    suite.addTestSuite(RestApiRequestTest.class);
+    suite.addTestSuite(RestApiServiceTest.class);
+    suite.addTestSuite(RpcApiServiceTest.class);
     suite.addTestSuite(AuthPresenterTest.class);
     suite.addTestSuite(EditorFactoryTest.class);
     suite.addTestSuite(HistoryManagerTest.class);
-    suite.addTestSuite(MethodSelectorPresenterTest.class);
-    suite.addTestSuite(ParameterFormPresenterTest.class);
+    suite.addTestSuite(RegexMatchRouterTest.class);
+    suite.addTestSuite(URLBuilderTest.class);
+    suite.addTestSuite(URLFragmentTest.class);
+    suite.addTestSuite(JsonPrettifierTest.class);
+    suite.addTestSuite(KeywordExtractorTest.class);
+    suite.addTestSuite(ApiServiceHelperTest.class);
+    suite.addTestSuite(EmbeddedParameterFormPresenterTest.class);
+    suite.addTestSuite(SearchEntryTest.class);
+    suite.addTestSuite(SearchResultIndexTest.class);
     suite.addTestSuite(ServiceLoaderTest.class);
-    suite.addTestSuite(ServiceSelectorPresenterTest.class);
-    suite.addTestSuite(VersionSelectorPresenterTest.class);
+    suite.addTestSuite(SchemaTest.class);
     return suite;
   }
 }

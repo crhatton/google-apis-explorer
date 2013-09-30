@@ -16,6 +16,7 @@
 
 package com.google.api.explorer.client.editors;
 
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
@@ -71,13 +72,14 @@ public abstract class Editor {
   }
 
   /** Whether all the values are valid for all the validators. */
-  boolean isValid() {
+  ValidationResult isValid() {
     for (Validator validator : validators) {
-      if (!validator.isValid(getValue())) {
-        return false;
+      ValidationResult result = validator.isValid(getValue());
+      if (result.getType() != ValidationResult.Type.VALID) {
+        return result;
       }
     }
-    return true;
+    return SimpleValidationResult.STATUS_VALID;
   }
 
   /** Update the display to denote whether the value(s) are valid or not. */

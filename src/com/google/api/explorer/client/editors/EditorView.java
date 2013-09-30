@@ -16,6 +16,7 @@
 
 package com.google.api.explorer.client.editors;
 
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import java.util.List;
@@ -37,5 +38,5 @@ public interface EditorView extends IsWidget {
   void setEnabled(boolean enabled);
 
   /** Update the view to denote whether the values are valid. */
-  void displayValidation(boolean valid);
+  void displayValidation(ValidationResult valid);
 }

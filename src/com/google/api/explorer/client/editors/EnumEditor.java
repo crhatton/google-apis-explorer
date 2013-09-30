@@ -17,13 +17,15 @@
 package com.google.api.explorer.client.editors;
 
 import com.google.api.explorer.client.Resources;
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
@@ -61,13 +63,13 @@ public class EnumEditor extends Editor {
    */
   public class EnumValidator implements Validator {
     @Override
-    public boolean isValid(List<String> values) {
+    public ValidationResult isValid(List<String> values) {
       for (String value : values) {
         if (!value.isEmpty() && !enumValues.contains(value)) {
-          return false;
+          return SimpleValidationResult.createError("Must be one of the specified values.");
         }
       }
-      return true;
+      return SimpleValidationResult.STATUS_VALID;
     }
   }
 
@@ -75,9 +77,10 @@ public class EnumEditor extends Editor {
    * {@link EditorView} implementation for displaying enum values using a
    * {@link SuggestBox}.
    */
-  static class EnumEditorViewImpl extends SimplePanel implements EditorView {
+  static class EnumEditorViewImpl extends FlowPanel implements EditorView {
 
     private SuggestBox suggestBox;
+    private Label errorMessage;
 
     EnumEditorViewImpl(final List<String> enumValues, final List<String> enumDescriptions) {
       // Sets up a SuggestOracle that, when the textbox has focus, displays the
@@ -97,6 +100,10 @@ public class EnumEditor extends Editor {
         }
       });
       add(suggestBox);
+
+      this.errorMessage = new Label("This parameter is invalid.");
+      errorMessage.setVisible(false);
+      add(errorMessage);
     }
 
     class EnumSuggestion implements Suggestion {
@@ -105,12 +112,12 @@ public class EnumEditor extends Editor {
 
       EnumSuggestion(String enumValue, String enumDescription) {
         this.enumValue = enumValue;
-        SafeHtmlBuilder enumDisplay = new SafeHtmlBuilder()
+        SafeHtmlBuilder newEnumDisplay = new SafeHtmlBuilder()
             .appendHtmlConstant("<b>").appendEscaped(enumValue).appendHtmlConstant("</b>");
         if (!enumDescription.isEmpty()) {
-          enumDisplay.appendHtmlConstant(": ").appendEscaped(enumDescription);
+          newEnumDisplay.appendHtmlConstant(": ").appendEscaped(enumDescription);
         }
-        this.enumDisplay = enumDisplay.toSafeHtml().asString();
+        enumDisplay = newEnumDisplay.toSafeHtml().asString();
       }
 
       @Override
@@ -140,11 +147,26 @@ public class EnumEditor extends Editor {
     }
 
     @Override
-    public void displayValidation(boolean valid) {
-      if (valid) {
-        suggestBox.removeStyleName(Resources.INSTANCE.style().invalidParameter());
-      } else {
-        suggestBox.addStyleName(Resources.INSTANCE.style().invalidParameter());
+    public void displayValidation(ValidationResult valid) {
+      removeStyleName(Resources.INSTANCE.style().infoParameter());
+      removeStyleName(Resources.INSTANCE.style().invalidParameter());
+
+      switch(valid.getType()) {
+        case VALID:
+          errorMessage.setVisible(false);
+          break;
+
+        case INFO:
+          addStyleName(Resources.INSTANCE.style().infoParameter());
+          errorMessage.setVisible(true);
+          errorMessage.setText(valid.getMessage());
+          break;
+
+        case ERROR:
+          addStyleName(Resources.INSTANCE.style().invalidParameter());
+          errorMessage.setVisible(true);
+          errorMessage.setText(valid.getMessage());
+          break;
       }
     }
   }
